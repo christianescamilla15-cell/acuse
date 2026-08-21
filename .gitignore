@@ -1,0 +1,59 @@
+# ── Python ────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# ── Entornos virtuales ────────────────────────────────────────────────────
+.venv/
+venv/
+env/
+ENV/
+
+# ── Empaquetado / distribución ────────────────────────────────────────────
+build/
+dist/
+sdist/
+wheels/
+*.egg-info/
+*.egg
+.eggs/
+pip-wheel-metadata/
+
+# ── Pruebas y cobertura ───────────────────────────────────────────────────
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+.tox/
+.nox/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+
+# ── Bases de datos locales (la demo usa SQLite) ───────────────────────────
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# ── Configuración local / secretos ────────────────────────────────────────
+.env
+.env.*
+!.env.example
+
+# ── Editores e IDE ────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.\#*
+\#*\#
+
+# ── Sistema operativo ─────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini

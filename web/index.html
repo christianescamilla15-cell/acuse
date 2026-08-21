@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Acuse · entregas con acuse verificable</title>
+  <meta name="description" content="Tablero del orquestador de liquidación Acuse: contrasta lo que el emisor da por entregado contra lo que el receptor confirmó.">
+  <meta name="color-scheme" content="dark">
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+
+  <!-- ══════════ CABECERA ══════════ -->
+  <header class="cabecera">
+    <nav class="cinta" aria-label="Enlaces del autor">
+      <a class="cinta__enlace" href="https://ch-portfolio-3d.vercel.app/" target="_blank" rel="noopener noreferrer">CH_1 · CHRISTIAN HERNÁNDEZ · ACUSE</a>
+      <a class="cinta__enlace cinta__enlace--acento" href="https://github.com/christianescamilla15-cell/acuse" target="_blank" rel="noopener noreferrer">CÓDIGO EN GITHUB →</a>
+    </nav>
+    <div class="cabecera__titulo">
+      <h1>Acuse</h1>
+      <p class="tesis">Una entrega sin acuse verificable no es una entrega.</p>
+    </div>
+  </header>
+
+  <main class="lienzo">
+
+    <!-- ══════════ BANDA DE ERRORES ══════════
+         Todo fallo de red o de la API se dice en voz alta, nunca se silencia. -->
+    <div id="errores" class="errores" role="alert" aria-live="assertive" hidden></div>
+
+    <!-- ══════════ BOTONERA DE SIMULACIÓN ══════════ -->
+    <section class="panel botonera" aria-label="Simulación">
+      <div class="botonera__titulo">
+        <span class="rotulo">SIMULACIÓN</span>
+        <span class="botonera__estado" id="estado-accion">listo</span>
+      </div>
+      <div class="botonera__botones">
+        <button type="button" class="boton" data-accion="lote">Correr lote</button>
+        <button type="button" class="boton boton--verde" data-accion="consumir">Que el receptor consuma</button>
+        <button type="button" class="boton boton--ambar" data-accion="sin_insumo">Corrida sin insumo</button>
+        <button type="button" class="boton boton--rojo" data-accion="vencer">Vencer plazos</button>
+        <button type="button" class="boton boton--tenue" data-accion="reiniciar">Reiniciar</button>
+        <button type="button" class="boton boton--tenue" id="boton-refrescar">Refrescar</button>
+      </div>
+    </section>
+
+    <!-- ══════════ ⭐ EL PANEL PRINCIPAL: EL CONTRASTE ══════════
+         Es el corazón de la demo: dos números que la mayoría de los sistemas
+         reportan como si fueran el mismo. -->
+    <section class="panel contraste" id="panel-contraste" aria-label="Contraste emisor contra receptor">
+      <div class="contraste__par">
+        <div class="cifra cifra--emisor">
+          <span class="cifra__etiqueta">ENTREGADO SEGÚN EL EMISOR</span>
+          <span class="cifra__valor" id="cifra-emisor">—</span>
+          <span class="cifra__nota">ENVIADO + ACUSADO · lo que el emisor ya dio por hecho</span>
+        </div>
+        <div class="contraste__vs" aria-hidden="true">≠</div>
+        <div class="cifra cifra--confirmado">
+          <span class="cifra__etiqueta">ENTREGADO CONFIRMADO</span>
+          <span class="cifra__valor" id="cifra-confirmado">—</span>
+          <span class="cifra__nota">sólo ACUSADO · alguien del otro lado lo confirmó</span>
+        </div>
+      </div>
+
+      <p class="contraste__diferencia" id="diferencia">Cargando el tablero…</p>
+
+      <!-- Marcadores secundarios: el resto del universo de entregas -->
+      <ul class="marcadores" id="marcadores"></ul>
+    </section>
+
+    <!-- ══════════ BRECHA POR CANAL ══════════ -->
+    <section class="seccion" aria-label="Brecha por canal">
+      <h2 class="seccion__titulo">Brecha por canal</h2>
+      <p class="seccion__nota">Cuánto de lo que salió por cada canal sigue sin confirmación del receptor.</p>
+      <div class="rejilla" id="brechas"></div>
+    </section>
+
+    <!-- ══════════ ENTREGAS ══════════ -->
+    <section class="seccion" aria-label="Entregas">
+      <h2 class="seccion__titulo">Entregas</h2>
+      <div class="filtros">
+        <label class="filtro">
+          <span>Estado</span>
+          <select id="filtro-estado">
+            <option value="TODOS">TODOS</option>
+            <option value="PENDIENTE">PENDIENTE</option>
+            <option value="ENVIADO">ENVIADO</option>
+            <option value="ACUSADO">ACUSADO</option>
+            <option value="SIN_ACUSE">SIN_ACUSE</option>
+            <option value="FALLIDO">FALLIDO</option>
+            <option value="RECHAZADO">RECHAZADO</option>
+          </select>
+        </label>
+        <label class="filtro">
+          <span>Canal</span>
+          <select id="filtro-canal">
+            <option value="TODOS">TODOS</option>
+          </select>
+        </label>
+        <span class="filtros__conteo" id="conteo-tabla"></span>
+      </div>
+      <div class="tabla-marco">
+        <table class="tabla" id="tabla-entregas">
+          <thead>
+            <tr>
+              <th scope="col">Referencia</th>
+              <th scope="col">Canal</th>
+              <th scope="col">Estado</th>
+              <th scope="col" class="num">Int.</th>
+              <th scope="col">Enviado</th>
+              <th scope="col">Acusado</th>
+              <th scope="col">Acuse por</th>
+              <th scope="col">Detalle</th>
+            </tr>
+          </thead>
+          <tbody id="cuerpo-entregas"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ══════════ CORRIDAS ══════════ -->
+    <section class="seccion" aria-label="Corridas">
+      <h2 class="seccion__titulo">Corridas</h2>
+      <p class="seccion__nota">Terminar sin error no es haber hecho algo. Una corrida sin insumo se marca aparte.</p>
+      <div class="rejilla" id="corridas"></div>
+    </section>
+
+    <!-- ══════════ PIE ══════════ -->
+    <footer class="pie">
+      <p><strong>Nota honesta.</strong> Los canales de esta demo están simulados de forma
+      determinista: no hay transporte real, ni receptor remoto, ni red de por medio. Lo que se
+      demuestra aquí es el <em>modelo</em> de entrega con acuse — que ENVIADO y ACUSADO sean
+      estados distintos, que el ruteo sea explícito y que una corrida sin insumo no pueda
+      disfrazarse de éxito. Sustituir el canal simulado por uno real no cambia ninguna de esas
+      tres decisiones.</p>
+      <p class="pie__firma">Acuse · orquestador de liquidación con acuse verificable · Python 3.12 · proyecto propio y público.</p>
+    </footer>
+
+  </main>
+
+</body>
+</html>

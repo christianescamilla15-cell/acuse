@@ -1,0 +1,7 @@
+# Acuse — dependencias. Biblioteca estándar + lo mínimo indispensable.
+fastapi
+uvicorn[standard]
+sqlalchemy>=2
+pydantic
+pytest
+httpx
