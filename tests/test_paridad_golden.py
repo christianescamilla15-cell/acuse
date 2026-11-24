@@ -103,7 +103,8 @@ def test_la_api_publica_las_cifras_del_lote_sembrado_igual_que_el_golden():
 
     assert respuesta.status_code == 200
     cuerpo = respuesta.json()
-    assert cuerpo.pop("consumido") is False
+    consumido = cuerpo.pop("consumido")         # fuera del assert: con -O el assert no se ejecuta
+    assert consumido is False
     assert cuerpo == golden
 
 

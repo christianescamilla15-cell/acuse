@@ -45,6 +45,7 @@ def servidor(url_bd: str) -> Iterator[str]:
         text=True,
     )
     base = f"http://127.0.0.1:{puerto}"
+    ultimo_error: Exception | None = None
     try:
         limite = time.monotonic() + 30
         while True:
@@ -53,10 +54,10 @@ def servidor(url_bd: str) -> Iterator[str]:
             try:
                 if httpx.get(f"{base}/health", timeout=1).status_code == 200:
                     break
-            except httpx.HTTPError:
-                pass
+            except httpx.HTTPError as exc:      # todavía no escucha: se reintenta hasta el límite
+                ultimo_error = exc
             if time.monotonic() > limite:
-                raise AssertionError("la API no respondió /health en 30 s")
+                raise AssertionError(f"la API no respondió /health en 30 s (último error: {ultimo_error!r})")
             time.sleep(0.2)
         yield base
     finally:

@@ -120,7 +120,7 @@ def test_todo_modulo_del_paquete_tiene_capa():
     assert len(MODULOS) == len(CAPAS)
 
 
-@pytest.mark.parametrize("ruta", MODULOS, ids=lambda r: _nombre_modulo(r))
+@pytest.mark.parametrize("ruta", MODULOS, ids=_nombre_modulo)
 def test_cada_modulo_respeta_su_capa(ruta):
     modulo = _nombre_modulo(ruta)
     assert violaciones(modulo, ruta.read_text(encoding="utf-8"), ruta.name == "__init__.py") == []
