@@ -13,7 +13,7 @@ import pytest
 
 from acuse.conciliador import marcar_vencidas
 from acuse.estados import DESPACHABLES, TRANSICIONES, Evento, TransicionInvalida, es_valida, siguiente
-from acuse.modelo import EstadoEntrega, Trabajo
+from acuse.modelo import ESTADOS_ABIERTOS, ESTADOS_PROBLEMA, Brecha, Entrega, EstadoEntrega, Trabajo
 
 from apoyo import (
     canales_dobles,
@@ -95,6 +95,24 @@ def test_nadie_vuelve_a_pendiente_y_todo_estado_es_alcanzable():
 
 def test_enviado_y_acusado_no_se_despachan_de_nuevo():
     assert DESPACHABLES == {P, F, R, S}
+
+
+@pytest.mark.parametrize("estado", list(EstadoEntrega), ids=lambda e: e.value)
+def test_solo_acusado_cuenta_como_entregado(estado):
+    entrega = Entrega(id="E", trabajo_id="T", referencia="R", canal="c", estado=estado)
+    assert entrega.entregado is (estado is A)
+
+
+def test_enviado_es_trabajo_abierto_y_los_problemas_tienen_nombre():
+    """ENVIADO no es «terminado»: sigue debiendo el acuse. ACUSADO no es abierto ni problema."""
+    assert ESTADOS_ABIERTOS == {P, E}
+    assert ESTADOS_PROBLEMA == {S, F, R}
+    assert A not in ESTADOS_ABIERTOS | ESTADOS_PROBLEMA
+
+
+@pytest.mark.parametrize(("sin_acuse", "hay"), [(0, False), (1, True), (40, True)])
+def test_hay_brecha_solo_cuando_algo_excedio_su_plazo(sin_acuse, hay):
+    assert Brecha(canal="c", enviados=40, acusados=0, sin_acuse=sin_acuse, mas_antiguo_s=1).hay_brecha is hay
 
 
 # ------------------------------------------- las inválidas, por las operaciones públicas
