@@ -22,6 +22,7 @@ from datetime import datetime
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from acuse.estados import Evento, siguiente
 from acuse.modelo import Brecha, EstadoEntrega, a_utc, ahora
 from acuse.persistencia import EntregaORM, EventoORM
 
@@ -122,7 +123,7 @@ def marcar_vencidas(session: Session, momento: datetime | None = None) -> int:
 
         transcurridos = int((momento - a_utc(fila.enviado_en)).total_seconds())
         exceso = transcurridos - fila.plazo_acuse_s
-        fila.estado = EstadoEntrega.SIN_ACUSE
+        fila.estado = siguiente(fila.estado, Evento.VENCIMIENTO)
         fila.detalle = (
             f"Sin acuse: se envió por «{fila.canal}» hace {transcurridos}s y el plazo "
             f"convenido es de {fila.plazo_acuse_s}s, excedido por {exceso}s. El envío "

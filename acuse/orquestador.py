@@ -22,6 +22,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from acuse.canales import AcuseImposible, Canal, ResultadoEnvio, validar_resultado
+from acuse.estados import DESPACHABLES, Evento, es_valida, siguiente
 from acuse.modelo import EstadoEntrega, ModoCanal, Trabajo, ahora
 from acuse.persistencia import CorridaORM, EntregaORM, EstadoCorrida, EventoORM
 from acuse.ruteo import Enrutador, SinRutaAplicable
@@ -31,10 +32,10 @@ from acuse.ruteo import Enrutador, SinRutaAplicable
 # lo hagan, la diferencia se pagará en entregas perdidas.
 __all__ = ["Canal", "ResultadoEnvio", "Orquestador"]
 
-# Estados en los que una entrega ya está viva y NO debe reintentarse: o el receptor la
-# confirmó (ACUSADO) o está esperando ese acuse (ENVIADO). Reintentar cualquiera de las
-# dos sería entregar dos veces lo mismo.
-_ESTADOS_VIVOS = frozenset({EstadoEntrega.ACUSADO, EstadoEntrega.ENVIADO})
+# Una entrega ya viva —ACUSADO o ENVIADO— NO se reintenta: o el receptor la confirmó o
+# está esperando ese acuse, y reenviarla sería entregar dos veces lo mismo. Cuáles se
+# pueden despachar lo dice la máquina de estados (`acuse.estados.DESPACHABLES`), y todo
+# cambio de estado de este módulo pasa por `siguiente()`.
 
 
 def _nuevo_id() -> str:
@@ -124,7 +125,7 @@ class Orquestador:
                     )
 
                     # ── Caso 2: ya está viva (ACUSADO o ENVIADO) ─────────────────
-                    if entrega is not None and entrega.estado in _ESTADOS_VIVOS:
+                    if entrega is not None and entrega.estado not in DESPACHABLES:
                         duplicados += 1
                         _anotar(
                             ses,
@@ -173,7 +174,7 @@ class Orquestador:
                     except SinRutaAplicable as exc:
                         rechazados += 1
                         entrega.canal = None
-                        entrega.estado = EstadoEntrega.RECHAZADO
+                        entrega.estado = siguiente(entrega.estado, Evento.SIN_RUTA)
                         entrega.detalle = str(exc)
                         _anotar(ses, entrega.id, "rechazado", str(exc))
                         continue
@@ -187,7 +188,7 @@ class Orquestador:
                         # El ruteo resolvió un canal que nadie implementa. Es una falla
                         # de configuración, no un caso a resolver por omisión.
                         fallidos += 1
-                        entrega.estado = EstadoEntrega.FALLIDO
+                        entrega.estado = siguiente(entrega.estado, Evento.FALLA_CANAL)
                         entrega.detalle = (
                             f"La regla «{decision.regla}» resolvió el canal "
                             f"«{decision.canal}», pero no hay ningún canal registrado con "
@@ -212,7 +213,7 @@ class Orquestador:
                         )
                     except Exception as exc:  # el canal reventó: es FALLIDO, no un hueco
                         fallidos += 1
-                        entrega.estado = EstadoEntrega.FALLIDO
+                        entrega.estado = siguiente(entrega.estado, Evento.FALLA_CANAL)
                         entrega.detalle = (
                             f"El canal «{decision.canal}» lanzó "
                             f"{type(exc).__name__}: {exc}"
@@ -233,7 +234,7 @@ class Orquestador:
                     # ── Caso 3: el canal NO aceptó ───────────────────────────────
                     if not getattr(resultado, "aceptado", False):
                         fallidos += 1
-                        entrega.estado = EstadoEntrega.FALLIDO
+                        entrega.estado = siguiente(entrega.estado, Evento.FALLA_CANAL)
                         entrega.detalle = (
                             getattr(resultado, "detalle", "")
                             or f"El canal «{decision.canal}» no aceptó el envío."
@@ -258,7 +259,7 @@ class Orquestador:
                         # nunca una cadena vacía.
                         actor = getattr(resultado, "acuse_por", None) or f"canal:{decision.canal}"
                         acusados += 1
-                        entrega.estado = EstadoEntrega.ACUSADO
+                        entrega.estado = siguiente(entrega.estado, Evento.ACUSE_INMEDIATO)
                         entrega.acusado_en = momento_envio
                         entrega.acuse_por = actor
                         entrega.detalle = (
@@ -269,7 +270,7 @@ class Orquestador:
                     else:
                         # Aceptado ≠ recibido. Se queda ENVIADO hasta que alguien acuse.
                         enviados += 1
-                        entrega.estado = EstadoEntrega.ENVIADO
+                        entrega.estado = siguiente(entrega.estado, Evento.DEPOSITO)
                         entrega.acusado_en = None
                         entrega.acuse_por = None
                         entrega.detalle = (
@@ -402,8 +403,8 @@ class Orquestador:
                     continue
 
                 for fila in filas:
-                    if fila.estado is EstadoEntrega.ENVIADO:
-                        fila.estado = EstadoEntrega.ACUSADO
+                    if es_valida(fila.estado, Evento.ACUSE_RECEPTOR):
+                        fila.estado = siguiente(fila.estado, Evento.ACUSE_RECEPTOR)
                         fila.acusado_en = momento
                         fila.acuse_por = actor
                         fila.detalle = (
