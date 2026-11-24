@@ -31,7 +31,9 @@ from pydantic import BaseModel, Field
 from sqlalchemy import func, select
 
 from acuse import __version__, conciliador
-from acuse.demo import CANAL_ASINCRONO, canales, generar_trabajos, reglas, sembrar
+from acuse.canales.lote import LoteDesconocido
+from acuse.cifras import cifras_de_lote
+from acuse.demo import CANAL_ASINCRONO, CANAL_LOTE, canales, generar_trabajos, reglas, sembrar
 from acuse.modelo import Brecha, EstadoEntrega, ahora
 from acuse.orquestador import Orquestador
 from acuse.persistencia import (
@@ -158,6 +160,12 @@ app.add_middleware(
 # ======================================================================================
 # Esquemas de salida
 # ======================================================================================
+class ErrorSalida(BaseModel):
+    """Error con motivo legible: un código sin explicación obliga a adivinar."""
+
+    detail: str = Field(description="Qué pasó y qué hacer.")
+
+
 class Salud(BaseModel):
     servicio: Literal["Acuse API"] = "Acuse API"
     estado: Literal["ok"] = "ok"
@@ -249,6 +257,25 @@ class RespuestaConsumo(BaseModel):
     pendientes_restantes: int | None
     actor: str
     nota: str
+
+
+class FilaCifrasSalida(BaseModel):
+    referencia: str = Field(description="Llave estable de la fila (folio de negocio).")
+    importe: str = Field(description="Decimal a centavos, como texto (nunca float).")
+    moneda: str
+    hash: str = Field(description="SHA-256 del JSON canónico [referencia, importe, moneda].")
+
+
+class CifrasSalida(BaseModel):
+    """Cifras control del objeto depositado: lo que el receptor debe poder reproducir."""
+
+    lote: str
+    moneda: str | None
+    conteo: int
+    suma: str = Field(description="Suma de los importes ya redondeados, como texto.")
+    hash_lote: str = Field(description="SHA-256 de los hashes de fila ordenados por referencia.")
+    consumido: bool = Field(description="Si el receptor ya leyó el lote.")
+    filas: list[FilaCifrasSalida]
 
 
 class RespuestaVencimiento(BaseModel):
@@ -397,8 +424,8 @@ def obtener_resumen() -> ResumenSalida:
     return _resumen_salida(contexto())
 
 
-@app.get("/api/brechas", tags=["tablero"])
-def obtener_brechas() -> list[dict]:
+@app.get("/api/brechas", response_model=list[BrechaSalida], tags=["tablero"])
+def obtener_brechas() -> list[BrechaSalida]:
     """Brecha de acuse por canal, como recurso propio.
 
     Existe además de /api/resumen porque el tablero la refresca por separado tras
@@ -406,17 +433,36 @@ def obtener_brechas() -> list[dict]:
     """
     ctx = contexto()
     with ctx.session_factory() as ses:
-        return [
-            {
-                "canal": b.canal,
-                "enviados": b.enviados,
-                "acusados": b.acusados,
-                "sin_acuse": b.sin_acuse,
-                "mas_antiguo_s": b.mas_antiguo_s,
-                "hay_brecha": b.hay_brecha,
-            }
-            for b in conciliador.brechas(ses)
-        ]
+        return [_brecha_salida(b) for b in conciliador.brechas(ses)]
+
+
+@app.get(
+    "/api/lotes/{lote}/cifras",
+    response_model=CifrasSalida,
+    tags=["tablero"],
+    responses={404: {"model": ErrorSalida, "description": "No hay objeto depositado para ese lote."}},
+)
+def obtener_cifras_de_lote(lote: str) -> CifrasSalida:
+    """Cifras control (conteo, suma en Decimal y hash por fila) del lote depositado.
+
+    Se calculan sobre lo que el receptor leería del objeto del lote, no sobre lo que el
+    emisor cree haber mandado: son las que el emisor tiene que poder igualar con las que
+    declaró. La conciliación completa vive en `acuse.conciliador.conciliar_lote`.
+    """
+    ctx = contexto()
+    canal = ctx.canales.get(CANAL_LOTE)
+    try:
+        if canal is None:
+            raise LoteDesconocido(lote, [])
+        registros = canal.registros_del_lote(lote)
+    except LoteDesconocido as exc:
+        raise HTTPException(status_code=404, detail=exc.args[0]) from None
+    cifras = cifras_de_lote(lote, registros)
+    return CifrasSalida(
+        **{k: v for k, v in cifras.como_dict().items() if k != "filas"},
+        consumido=bool(canal.lotes_depositados[lote]["consumido"]),
+        filas=[FilaCifrasSalida(**f) for f in cifras.como_dict()["filas"]],
+    )
 
 
 @app.get("/api/entregas", response_model=list[EntregaSalida], tags=["tablero"])
@@ -512,7 +558,15 @@ def simular_corrida_vacia() -> CorridaSalida:
     return _corrida_salida(ctx.orquestador.procesar([]))
 
 
-@app.post("/api/simular/consumir", response_model=RespuestaConsumo, tags=["simulación"])
+@app.post(
+    "/api/simular/consumir",
+    response_model=RespuestaConsumo,
+    tags=["simulación"],
+    responses={
+        404: {"model": ErrorSalida, "description": "No hay canal con ese nombre."},
+        409: {"model": ErrorSalida, "description": "El canal es síncrono: no tiene buzón que consumir."},
+    },
+)
 def simular_consumo(datos: PeticionConsumo) -> RespuestaConsumo:
     """El receptor asíncrono lee su buzón y de ahí —y sólo de ahí— nace el acuse.
 

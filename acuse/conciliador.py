@@ -13,20 +13,26 @@ Tres decisiones que hacen que la medición no se pueda maquillar:
     acuse y estar gravemente roto si la más vieja lleva semanas.
   * `resumen()` publica los DOS números —según el emisor y confirmado— uno junto al
     otro. Publicar sólo el primero es la forma más común de este fallo.
+
+Y una cuarta, para los lotes: el acuse dice QUE el lote llegó; `conciliar_lote()` dice
+si llegó COMPLETO, recalculando del lado receptor las cifras control que declaró el
+emisor (conteo, suma en Decimal y hash por fila; ver `acuse.cifras`).
 """
 from __future__ import annotations
 
 from collections import defaultdict
+from collections.abc import Iterable, Mapping
 from datetime import datetime
 
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from acuse.cifras import CifrasControl, ResultadoConciliacion, cifras_de_lote, conciliar_cifras
 from acuse.estados import Evento, siguiente
-from acuse.modelo import Brecha, EstadoEntrega, a_utc, ahora
+from acuse.modelo import Brecha, EstadoEntrega, Trabajo, a_utc, ahora
 from acuse.persistencia import EntregaORM, EventoORM
 
-__all__ = ["brechas", "marcar_vencidas", "resumen"]
+__all__ = ["brechas", "cifras_declaradas", "conciliar_lote", "marcar_vencidas", "resumen"]
 
 # Lo que salió por un canal y todavía nadie confirmó.
 _SIN_CONFIRMAR = (EstadoEntrega.ENVIADO, EstadoEntrega.SIN_ACUSE)
@@ -195,3 +201,20 @@ def resumen(session: Session) -> dict:
             else f"Sin brecha: las {confirmado} que figuran como entregadas tienen acuse."
         ),
     }
+
+
+def cifras_declaradas(lote: str, trabajos: Iterable[Trabajo]) -> CifrasControl:
+    """Cifras control que el EMISOR declara para un lote: sólo los trabajos de ese lote."""
+    return cifras_de_lote(lote, ((t.referencia, t.carga) for t in trabajos if t.lote == lote))
+
+
+def conciliar_lote(
+    declaradas: CifrasControl, registros_recibidos: Iterable[tuple[str, Mapping]]
+) -> ResultadoConciliacion:
+    """Recalcula las cifras con lo que el receptor tiene y las compara con las declaradas.
+
+    `registros_recibidos` son pares (referencia, carga) tal como los lee el receptor (por
+    ejemplo `CanalLote.registros_del_lote`). Cada diferencia sale clasificada: FALTANTE,
+    SOBRANTE, IMPORTE_DISTINTO o MONEDA_DISTINTA; un lote sin filas es SIN_REGISTROS.
+    """
+    return conciliar_cifras(declaradas, cifras_de_lote(declaradas.lote, registros_recibidos))

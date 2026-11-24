@@ -97,6 +97,16 @@ class CanalLote:
             raise LoteDesconocido(lote, sorted(self._objetos))
         return list(self._objetos[lote]["referencias"])
 
+    def registros_del_lote(self, lote: str) -> list[tuple[str, dict]]:
+        """(referencia, carga) de cada registro del objeto, tal como lo leería el receptor.
+
+        Es la entrada para recalcular las cifras control del lado receptor
+        (`acuse.conciliador.conciliar_lote`). Se devuelven copias: leer no altera el objeto.
+        """
+        if lote not in self._objetos:
+            raise LoteDesconocido(lote, sorted(self._objetos))
+        return [(r["referencia"], dict(r["carga"])) for r in self._objetos[lote]["registros"]]
+
     def mas_antiguo_pendiente(self) -> datetime | None:
         fechas = [o["depositado_en"] for o in self._objetos.values() if not o["consumido"]]
         return min(fechas) if fechas else None
