@@ -1,5 +1,8 @@
 # Acuse
 
+[![ci](https://github.com/christianescamilla15-cell/acuse/actions/workflows/ci.yml/badge.svg)](https://github.com/christianescamilla15-cell/acuse/actions/workflows/ci.yml)
+[![seguridad](https://github.com/christianescamilla15-cell/acuse/actions/workflows/seguridad.yml/badge.svg)](https://github.com/christianescamilla15-cell/acuse/actions/workflows/seguridad.yml)
+
 **Orquestador de liquidación con acuse verificable.**
 
 > ### Una entrega sin acuse verificable no es una entrega.
@@ -175,14 +178,14 @@ porque un lote es un asíncrono con acuse colectivo, no una tercera física de e
 
 ---
 
-## Arranque
+## Cómo ejecutar
 
 Requiere Python 3.12.
 
 ```bash
 python -m venv .venv
 source .venv/bin/activate            # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
+pip install -r requirements.txt      # sólo ejecución (lo mismo que lleva la imagen)
 
 uvicorn acuse.api.app:app --reload --port 8000
 ```
@@ -195,9 +198,10 @@ http://127.0.0.1:8000/
 
 La especificación viva de la API la publica el propio servicio en `/docs`.
 
-Pruebas:
+Pruebas (ver la sección [Pruebas](#pruebas)):
 
 ```bash
+pip install -r requirements-dev.txt
 pytest -q
 ```
 
@@ -266,16 +270,63 @@ clase de afirmación no verificada que el proyecto combate.
   auditables**, no expresivas.
 - **No reemplaza al receptor.** Acuse no puede confirmar en nombre de nadie. Si el receptor
   no coopera, Acuse no inventa el acuse: **muestra el hueco**. Ese es exactamente el punto,
-  y es también su costo (ver `docs/decisiones/ADR-001`).
+  y es también su costo (ver [ADR 0002](docs/adr/0002-acuse-verificable.md)).
 - **No hay autenticación ni multi-tenencia.** Es una demostración de modelo, no un servicio
   expuesto a terceros.
 
 ---
 
-## Decisiones de arquitectura
+## Arquitectura
 
-- [ADR-001 · Acuse verificable del receptor](docs/decisiones/ADR-001-acuse-verificable.md)
-- [ADR-002 · Ruteo explícito, sin canal por omisión](docs/decisiones/ADR-002-ruteo-explicito.md)
+C4 en Mermaid (contexto, contenedores y componentes reales), las capas y la máquina de estados:
+[docs/arquitectura/README.md](docs/arquitectura/README.md). Un proceso y una imagen: la API (FastAPI) sirve el
+tablero del mismo origen y persiste en SQLite (memoria o archivo con `ACUSE_BD`). Las capas no son un dibujo:
+`tests/test_arquitectura.py` falla si el dominio importa FastAPI, SQLAlchemy o la persistencia.
+
+Decisiones ([docs/adr/](docs/adr/)):
+
+- [ADR 0001 · Registrar las decisiones](docs/adr/0001-registrar-decisiones.md)
+- [ADR 0002 · Acuse verificable del receptor](docs/adr/0002-acuse-verificable.md)
+- [ADR 0003 · Ruteo explícito, sin canal por omisión](docs/adr/0003-ruteo-explicito.md)
+- [ADR 0004 · La entrega como máquina de estados por eventos](docs/adr/0004-maquina-de-estados-por-eventos.md)
+- [ADR 0005 · Cifras control en Decimal y oráculo independiente](docs/adr/0005-cifras-control-y-oraculo-independiente.md)
+- [ADR 0006 · SQLite como persistencia](docs/adr/0006-sqlite-como-persistencia.md)
+
+Contrato de la API: [docs/api/openapi.json](docs/api/openapi.json) (generado de la app con
+`herramientas/exportar_openapi.py`; una prueba falla si se desincroniza). Operación y reversa: [RUNBOOK.md](RUNBOOK.md).
+
+---
+
+## Pruebas
+
+La compuerta es [docs/reglas.md](docs/reglas.md): **88 reglas de negocio, cada una con sus pruebas**
+(`archivo::función`), verificada por `tests/test_reglas_doc.py` — ninguna regla sin prueba, ninguna prueba sin
+regla. La cobertura se reporta en el CI; no es la compuerta.
+
+| Capa | Qué prueba | Dónde |
+|---|---|---|
+| Dominio | Máquina de estados (las 36 combinaciones estado × evento), ruteo, cifras control, bordes de importes (Decimal, redondeo) y de fechas (cambio de horario) | `tests/test_maquina_estados.py`, `test_ruteo.py`, `test_cifras_control.py`, `test_bordes_importes.py`, `test_bordes_fechas.py` |
+| Aplicación | Orquestador, conciliador, reenvío idempotente, presupuesto de consultas SQL | `tests/test_orquestador*.py`, `test_conciliador.py`, `test_reenvio_idempotente.py`, `test_presupuesto_consultas.py` |
+| Integración | SQLite en archivo real: reabrir, zonas horarias, restricciones de la base | `tests/test_persistencia_sqlite.py` |
+| Paridad | Golden generado por un oráculo independiente (centavos enteros) + controles negativos | `tests/test_paridad_golden.py`, `tests/golden/` |
+| API y contrato | Endpoints, errores, contrato versionado y Schemathesis contra la app en proceso | `tests/test_api*.py`, `test_contrato_*.py` |
+| Arquitectura | Imports por capa, con controles negativos del verificador | `tests/test_arquitectura.py` |
+| E2E | El recorrido de la demo contra uvicorn como proceso, con reinicio sobre el mismo archivo | `tests/e2e/` |
+
+```bash
+pytest -q                                        # todo (≈ 30 s; incluye E2E y Schemathesis)
+python tests/golden/generar_golden.py --revisar  # el golden coincide con su oráculo
+python herramientas/exportar_openapi.py --revisar
+```
+
+---
+
+## Seguridad
+
+Política y canal de reporte en [SECURITY.md](SECURITY.md). Cada cambio pasa CodeQL (Python y JavaScript), Semgrep
+(bloqueante), Trivy (dependencias y Dockerfile), gitleaks sobre toda la historia, una revisión de confidencialidad y
+SBOM; cada escaneo debe probar que analizó algo. La imagen corre sin root y sin herramientas de pruebas, y el CI la
+construye y la arranca. **Acuse no tiene autenticación**: es una demostración, no la expongas a terceros.
 
 ---
 

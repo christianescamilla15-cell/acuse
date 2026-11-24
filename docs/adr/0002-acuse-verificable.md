@@ -1,9 +1,10 @@
-# ADR-001 · La entrega la confirma el receptor, no el emisor
+# ADR 0002 · La entrega la confirma el receptor, no el emisor
 
 - **Estado:** aceptada
 - **Fecha:** 2026-08-21
 - **Ámbito:** modelo de entrega (`acuse.modelo`), máquina de estados, tablero
-- **Relacionada:** ADR-002 (ruteo explícito)
+- **Relacionada:** ADR 0003 (ruteo explícito)
+- **Antes:** `docs/decisiones/ADR-001-…` (renumerada el 2026-11-24 al ordenar `docs/adr/`)
 
 ---
 

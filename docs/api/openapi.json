@@ -748,7 +748,7 @@
     "description": "Acuse API — la capa HTTP que hace visible lo que el núcleo ya sabe.\n\nUn tablero puede mentir de tres formas, y esta API está diseñada para que ninguna\nquepa:\n\n  1. **enviado ≠ recibido.** ``/api/resumen`` publica los DOS números juntos:\n     ``entregado_segun_emisor`` y ``entregado_confirmado``. Publicar sólo el primero\n     es la forma más común del fallo; publicarlos juntos convierte la diferencia en\n     una cifra que alguien tiene que explicar.\n  2. **ruteo por omisión.** Las entregas sin ruta salen en ``/api/entregas`` con\n     ``canal: null``, estado RECHAZADO y el motivo textual. No se filtran ni se\n     agrupan en un «otros».\n  3. **verde ≠ hizo algo.** ``/api/corridas`` devuelve el estado real de cada corrida,\n     incluido SIN_INSUMO, y un ``hizo_algo`` explícito. Un tablero que sólo sabe decir\n     verde/rojo no puede distinguir «procesé todo» de «no había nada», y por eso nadie\n     hace esa pregunta.\n\nLos endpoints ``/api/simular/*`` existen para poder provocar cada patología en vivo,\nsin esperar a que ocurra sola.\n",
     "summary": "Una entrega sin acuse verificable no es una entrega.",
     "title": "Acuse API",
-    "version": "0.1.0"
+    "version": "0.2.0"
   },
   "openapi": "3.1.0",
   "paths": {
