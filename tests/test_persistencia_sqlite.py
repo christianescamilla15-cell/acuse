@@ -13,7 +13,6 @@ from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
 import pytest
-from apoyo import canales_dobles, orquestador, trabajo
 from sqlalchemy import select, text
 from sqlalchemy.exc import IntegrityError, StatementError
 
@@ -29,6 +28,8 @@ from acuse.persistencia import (
     crear_session_factory,
     crear_tablas,
 )
+
+from apoyo import canales_dobles, orquestador, trabajo
 
 
 @pytest.fixture()

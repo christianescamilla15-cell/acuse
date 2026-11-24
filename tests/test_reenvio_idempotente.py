@@ -10,6 +10,14 @@ fallidos contados para una sola entrega). Ahora se procesa una sola vez.
 from __future__ import annotations
 
 import pytest
+
+from acuse.conciliador import brechas, resumen
+from acuse.demo import CANAL_ASINCRONO, CANAL_LOTE, CANAL_SINCRONO, LOTE_SEMBRADO, canales, reglas, trabajos_sembrados
+from acuse.modelo import EstadoEntrega, ModoCanal, Trabajo
+from acuse.orquestador import Orquestador
+from acuse.persistencia import EstadoCorrida
+from acuse.ruteo import Enrutador
+
 from apoyo import (
     CanalDoble,
     entrega_por_referencia,
@@ -19,14 +27,6 @@ from apoyo import (
     tipos_evento,
     trabajo,
 )
-
-from acuse.conciliador import brechas, resumen
-from acuse.demo import CANAL_ASINCRONO, CANAL_LOTE, CANAL_SINCRONO, LOTE_SEMBRADO, canales, reglas
-from acuse.demo import trabajos_sembrados
-from acuse.modelo import EstadoEntrega, ModoCanal, Trabajo
-from acuse.orquestador import Orquestador
-from acuse.persistencia import EstadoCorrida
-from acuse.ruteo import Enrutador
 
 # (desenlace, destino, canales) — cada forma en que puede terminar el primer intento.
 DESENLACES = {

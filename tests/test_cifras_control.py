@@ -9,7 +9,6 @@ import random
 from decimal import Decimal
 
 import pytest
-from apoyo import nueva_bd
 
 from acuse.canales.lote import CanalLote, LoteDesconocido
 from acuse.cifras import (
@@ -23,6 +22,8 @@ from acuse.conciliador import cifras_declaradas, conciliar_lote
 from acuse.modelo import ModoCanal, ReglaRuteo, Trabajo
 from acuse.orquestador import Orquestador
 from acuse.ruteo import Enrutador
+
+from apoyo import nueva_bd
 
 LOTE = "corte-prueba"
 BASE = [

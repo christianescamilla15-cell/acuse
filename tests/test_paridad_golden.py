@@ -17,7 +17,6 @@ import subprocess
 import sys
 
 import pytest
-from apoyo import RAIZ_REPO, nueva_bd
 from fastapi.testclient import TestClient
 
 from acuse.api.app import app
@@ -28,6 +27,8 @@ from acuse.demo import LOTE_SEMBRADO, trabajos_sembrados
 from acuse.modelo import ReglaRuteo, Trabajo
 from acuse.orquestador import Orquestador
 from acuse.ruteo import Enrutador
+
+from apoyo import RAIZ_REPO, nueva_bd
 
 GOLDEN = RAIZ_REPO / "tests" / "golden"
 CASOS = ["lote_bordes", "lote_sembrado"]

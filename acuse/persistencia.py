@@ -18,13 +18,15 @@ from datetime import datetime, timezone
 
 from sqlalchemy import (
     DateTime,
-    Enum as SAEnum,
     ForeignKey,
     Integer,
     String,
     Text,
     TypeDecorator,
     create_engine,
+)
+from sqlalchemy import (
+    Enum as SAEnum,
 )
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker

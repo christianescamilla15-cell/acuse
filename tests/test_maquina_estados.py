@@ -10,6 +10,11 @@ from __future__ import annotations
 import itertools
 
 import pytest
+
+from acuse.conciliador import marcar_vencidas
+from acuse.estados import DESPACHABLES, TRANSICIONES, Evento, TransicionInvalida, es_valida, siguiente
+from acuse.modelo import EstadoEntrega, Trabajo
+
 from apoyo import (
     canales_dobles,
     entrega_por_referencia,
@@ -18,10 +23,6 @@ from apoyo import (
     sembrar_entrega,
     tipos_evento,
 )
-
-from acuse.conciliador import marcar_vencidas
-from acuse.estados import DESPACHABLES, TRANSICIONES, Evento, TransicionInvalida, es_valida, siguiente
-from acuse.modelo import EstadoEntrega, Trabajo
 
 P, E, A, S, F, R = (
     EstadoEntrega.PENDIENTE,

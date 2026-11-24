@@ -1,0 +1,17 @@
+# Sólo configuración de herramientas: Acuse no se publica como paquete (se ejecuta desde el árbol
+# o desde la imagen). Dependencias en requirements.txt (ejecución) y requirements-dev.txt.
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+markers = [
+    "e2e: arranca la API como proceso (uvicorn) y la recorre por HTTP",
+]
+
+[tool.coverage.run]
+source = ["acuse"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
