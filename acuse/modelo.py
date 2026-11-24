@@ -22,6 +22,23 @@ def ahora() -> datetime:
     return datetime.now(timezone.utc)
 
 
+def a_utc(momento: datetime) -> datetime:
+    """El mismo instante, expresado en UTC. Una fecha sin zona NO se adivina: es un error.
+
+    Trampa real que esto cierra: Python resta dos `datetime` con el MISMO `tzinfo` como
+    horas de pared, ignorando el cambio de horario. Enviado a la 01:30 y revisado a las
+    03:30 de la madrugada en que se adelanta el reloj dan «2 h» aunque sólo pasó 1 h, y
+    una entrega vence antes de tiempo (o, en otoño, después). Los plazos de acuse se
+    miden en tiempo absoluto, así que toda resta pasa antes por UTC.
+    """
+    if momento.tzinfo is None or momento.utcoffset() is None:
+        raise ValueError(
+            f"La fecha {momento.isoformat()} no trae zona horaria. Un instante sin zona no "
+            "se puede comparar contra un plazo: adivinarle una zona es mover el plazo."
+        )
+    return momento.astimezone(timezone.utc)
+
+
 class EstadoEntrega(str, enum.Enum):
     PENDIENTE = "PENDIENTE"      # aceptada, aún no se intenta
     ENVIADO = "ENVIADO"          # el emisor la puso en el canal · NO es entrega
@@ -85,9 +102,11 @@ class Entrega:
         return self.estado is EstadoEntrega.ACUSADO
 
     def vencida(self, momento: datetime | None = None) -> bool:
+        """ENVIADO y con MÁS de `plazo_acuse_s` transcurridos (en el límite exacto, aún no)."""
         if self.estado is not EstadoEntrega.ENVIADO or self.enviado_en is None:
             return False
-        return (momento or ahora()) - self.enviado_en > timedelta(seconds=self.plazo_acuse_s)
+        transcurrido = a_utc(momento or ahora()) - a_utc(self.enviado_en)
+        return transcurrido > timedelta(seconds=self.plazo_acuse_s)
 
 
 @dataclass

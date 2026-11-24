@@ -22,7 +22,7 @@ from datetime import datetime
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from acuse.modelo import Brecha, EstadoEntrega, ahora
+from acuse.modelo import Brecha, EstadoEntrega, a_utc, ahora
 from acuse.persistencia import EntregaORM, EventoORM
 
 __all__ = ["brechas", "marcar_vencidas", "resumen"]
@@ -47,8 +47,11 @@ def brechas(session: Session, momento: datetime | None = None) -> list[Brecha]:
 
     Las entregas RECHAZADO no aparecen aquí porque no tienen canal — nunca llegaron a
     salir. Se ven en `resumen()`, que no deja fuera ningún estado.
+
+    `momento` puede venir en cualquier zona horaria; la antigüedad se mide en tiempo
+    absoluto (UTC), así que un cambio de horario no la alarga ni la acorta.
     """
-    momento = momento or ahora()
+    momento = a_utc(momento or ahora())
 
     filas = session.scalars(
         select(EntregaORM).where(
@@ -76,7 +79,7 @@ def brechas(session: Session, momento: datetime | None = None) -> list[Brecha]:
             acumulado["sin_acuse"] += 1
 
         if fila.enviado_en is not None:
-            antiguedad = int((momento - fila.enviado_en).total_seconds())
+            antiguedad = int((momento - a_utc(fila.enviado_en)).total_seconds())
             if antiguedad > acumulado["mas_antiguo_s"]:
                 acumulado["mas_antiguo_s"] = antiguedad
 
@@ -103,7 +106,7 @@ def marcar_vencidas(session: Session, momento: datetime | None = None) -> int:
     cambie solo, sin que nadie levante la mano, es justo lo que evita que el problema
     se descubra semanas después.
     """
-    momento = momento or ahora()
+    momento = a_utc(momento or ahora())
 
     candidatas = session.scalars(
         select(EntregaORM).where(
@@ -117,7 +120,7 @@ def marcar_vencidas(session: Session, momento: datetime | None = None) -> int:
         if not fila.vencida(momento):
             continue
 
-        transcurridos = int((momento - fila.enviado_en).total_seconds())
+        transcurridos = int((momento - a_utc(fila.enviado_en)).total_seconds())
         exceso = transcurridos - fila.plazo_acuse_s
         fila.estado = EstadoEntrega.SIN_ACUSE
         fila.detalle = (
