@@ -116,16 +116,33 @@ class Orquestador:
             # fuera de la sesión y leerle atributos ahí ya no es confiable.
             corrida_id, iniciada_en = corrida.id, corrida.iniciada_en
 
+            # Claves ya procesadas EN ESTA corrida. Sin esto, un trabajo repetido dentro del
+            # mismo lote se reintentaba en la misma pasada si el primer intento fallaba: dos
+            # llamadas al canal y dos fallidos contados para una sola entrega.
+            vistas: dict[str, str] = {}           # clave → id de la entrega
+
             try:
                 for trabajo in trabajos:
                     # Misma clave = misma entrega. Nunca se duplica.
                     clave = f"{trabajo.id}:{trabajo.referencia}"
+                    if clave in vistas:
+                        duplicados += 1
+                        _anotar(
+                            ses,
+                            vistas[clave],
+                            "duplicado_en_corrida",
+                            f"El trabajo «{trabajo.id}» viene repetido en la misma corrida "
+                            f"(clave «{clave}»). Se procesa una sola vez: la repetición no "
+                            "se envía ni se cuenta.",
+                        )
+                        continue
                     entrega = ses.scalar(
                         select(EntregaORM).where(EntregaORM.idempotencia == clave)
                     )
 
                     # ── Caso 2: ya está viva (ACUSADO o ENVIADO) ─────────────────
                     if entrega is not None and entrega.estado not in DESPACHABLES:
+                        vistas[clave] = entrega.id
                         duplicados += 1
                         _anotar(
                             ses,
@@ -165,6 +182,7 @@ class Orquestador:
                             f"Reintento sobre la entrega existente (venía de "
                             f"{entrega.estado.value}).",
                         )
+                    vistas[clave] = entrega.id
 
                     # ── Ruteo EXPLÍCITO ──────────────────────────────────────────
                     try:
