@@ -23,11 +23,11 @@ from __future__ import annotations
 import os
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta
-from typing import Any, Literal
+from typing import Annotated, Any, Literal
 
 from fastapi import Body, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, BeforeValidator, ConfigDict, Field
 from sqlalchemy import func, select
 
 from acuse import __version__, conciliador
@@ -293,9 +293,44 @@ class RespuestaReinicio(BaseModel):
 
 # ======================================================================================
 # Esquemas de entrada
+#
+# Estrictos: lo que no cumple el esquema se RECHAZA con 422, no se coacciona. Sin esto
+# `{"incluir_sin_ruta": 0}` se leía como False y `{"n": false}` como 0 (lo encontró la
+# prueba de contrato con Schemathesis): la API aceptaba en silencio lo que su contrato
+# dice que no acepta.
 # ======================================================================================
-class PeticionCorrida(BaseModel):
-    n: int = Field(default=6, ge=0, le=500, description="Cuántos trabajos generar.")
+#: Diez años: más allá no hay plazo de acuse que vencer, y `timedelta` se desborda (500).
+AVANCE_MAXIMO_S = 10 * 365 * 24 * 3600
+
+
+class _Estricto(BaseModel):
+    model_config = ConfigDict(strict=True, extra="forbid")
+
+
+def _entero_json(valor: Any) -> Any:
+    """Entero en el sentido de JSON Schema: 6 y 6.0 sí; true, 6.5 y "6" no."""
+    if isinstance(valor, bool):
+        raise ValueError("se esperaba un entero, no un booleano")
+    if isinstance(valor, float) and valor.is_integer():
+        return int(valor)
+    return valor
+
+
+def _entero(minimo: int, maximo: int | None = None) -> Any:
+    """Entero JSON acotado. Las cotas van ANTES del validador: al revés, Pydantic las
+    publica en el contrato como «ge»/«le», que no son palabras de JSON Schema."""
+    return Annotated[int, Field(ge=minimo, le=maximo), BeforeValidator(_entero_json)]
+
+
+#: Respuesta común de los POST con cuerpo: un cuerpo que no es JSON en UTF-8 no llega
+#: ni a validarse, y FastAPI responde 400.
+_CUERPO_ILEGIBLE: dict[int | str, dict[str, Any]] = {
+    400: {"model": ErrorSalida, "description": "El cuerpo no es JSON legible en UTF-8."},
+}
+
+
+class PeticionCorrida(_Estricto):
+    n: _entero(0, 500) = Field(default=6, description="Cuántos trabajos generar.")
     incluir_sin_ruta: bool = Field(
         default=False,
         description=(
@@ -305,7 +340,7 @@ class PeticionCorrida(BaseModel):
     )
 
 
-class PeticionConsumo(BaseModel):
+class PeticionConsumo(_Estricto):
     canal: str = Field(
         default=CANAL_ASINCRONO,
         description=(
@@ -313,9 +348,8 @@ class PeticionConsumo(BaseModel):
             "nace la brecha y por tanto lo que casi siempre se quiere consumir."
         ),
     )
-    n: int | None = Field(
+    n: _entero(0) | None = Field(
         default=None,
-        ge=0,
         description=(
             "Cuántos objetos leer (o cuántos lotes, si el canal agrupa). "
             "Nulo = todo lo pendiente."
@@ -323,10 +357,9 @@ class PeticionConsumo(BaseModel):
     )
 
 
-class PeticionVencimiento(BaseModel):
-    avance_s: int | None = Field(
+class PeticionVencimiento(_Estricto):
+    avance_s: _entero(1, AVANCE_MAXIMO_S) | None = Field(
         default=None,
-        ge=1,
         description=(
             "Segundos que avanza el reloj lógico. Por omisión, lo justo para que "
             "venza el plazo más largo que haya en vuelo."
@@ -528,7 +561,7 @@ def listar_eventos(
     return [_evento_salida(f) for f in filas]
 
 
-@app.post("/api/simular/corrida", response_model=CorridaSalida, tags=["simulación"])
+@app.post("/api/simular/corrida", response_model=CorridaSalida, tags=["simulación"], responses=_CUERPO_ILEGIBLE)
 def simular_corrida(datos: PeticionCorrida = Body(default=PeticionCorrida())) -> CorridaSalida:
     """Genera ``n`` trabajos y los procesa.
 
@@ -563,6 +596,7 @@ def simular_corrida_vacia() -> CorridaSalida:
     response_model=RespuestaConsumo,
     tags=["simulación"],
     responses={
+        **_CUERPO_ILEGIBLE,
         404: {"model": ErrorSalida, "description": "No hay canal con ese nombre."},
         409: {"model": ErrorSalida, "description": "El canal es síncrono: no tiene buzón que consumir."},
     },
@@ -644,7 +678,9 @@ def simular_consumo(datos: PeticionConsumo) -> RespuestaConsumo:
     )
 
 
-@app.post("/api/simular/vencer", response_model=RespuestaVencimiento, tags=["simulación"])
+@app.post(
+    "/api/simular/vencer", response_model=RespuestaVencimiento, tags=["simulación"], responses=_CUERPO_ILEGIBLE
+)
 def simular_vencimiento(
     datos: PeticionVencimiento | None = Body(default=None),
 ) -> RespuestaVencimiento:
@@ -725,8 +761,28 @@ def reiniciar_sinonimo() -> RespuestaReinicio:
 # El tablero vive en /web y se sirve desde la misma app: una sola cosa que
 # levantar, y el navegador consume /api del mismo origen (sin CORS que configurar).
 from pathlib import Path as _Path  # noqa: E402
+
 from fastapi.staticfiles import StaticFiles  # noqa: E402
+from starlette.routing import Match, Mount  # noqa: E402
 
 _WEB = _Path(__file__).resolve().parent.parent.parent / "web"
+_PREFIJOS_DE_LA_API = ("/api/", "/health", "/docs", "/redoc", "/openapi.json")
+
+
+class _Tablero(Mount):
+    """Montaje en «/» que NO tapa la API.
+
+    Un `Mount("/")` casa con cualquier ruta, así que un GET a un endpoint que sólo acepta
+    POST caía en los archivos estáticos y respondía 404 «no existe» en lugar de 405
+    «existe, pero con otro método» (lo encontró la prueba de contrato con Schemathesis).
+    Las rutas de la API quedan fuera del tablero y Starlette responde 405 con `Allow`.
+    """
+
+    def matches(self, scope):
+        if scope.get("type") == "http" and scope.get("path", "").startswith(_PREFIJOS_DE_LA_API):
+            return Match.NONE, {}
+        return super().matches(scope)
+
+
 if _WEB.is_dir():
-    app.mount("/", StaticFiles(directory=str(_WEB), html=True), name="tablero")
+    app.router.routes.append(_Tablero("/", app=StaticFiles(directory=str(_WEB), html=True), name="tablero"))
