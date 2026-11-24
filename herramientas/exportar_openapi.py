@@ -23,7 +23,9 @@ def contrato() -> str:
     sys.path.insert(0, str(RAIZ))
     from acuse.api.app import app
 
-    return json.dumps(app.openapi(), indent=2, ensure_ascii=False, sort_keys=True) + "\n"
+    # Sin ordenar llaves: «openapi» e «info» quedan al principio, como las buscan las herramientas que
+    # reconocen un contrato por sus primeros bytes (con sort_keys quedaban detrás de «components»).
+    return json.dumps(app.openapi(), indent=2, ensure_ascii=False) + "\n"
 
 
 def main() -> int:

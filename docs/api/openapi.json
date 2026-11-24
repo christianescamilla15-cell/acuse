@@ -1,842 +1,147 @@
 {
-  "components": {
-    "schemas": {
-      "BrechaSalida": {
-        "description": "Distancia entre «lo mandé» y «lo tienen», por canal.",
-        "properties": {
-          "acusados": {
-            "description": "El receptor confirmó. Sólo esto son entregas.",
-            "title": "Acusados",
-            "type": "integer"
-          },
-          "canal": {
-            "title": "Canal",
-            "type": "string"
-          },
-          "enviados": {
-            "description": "Salió por el canal y todavía no tiene acuse.",
-            "title": "Enviados",
-            "type": "integer"
-          },
-          "hay_brecha": {
-            "title": "Hay Brecha",
-            "type": "boolean"
-          },
-          "mas_antiguo_s": {
-            "description": "Antigüedad del envío sin acuse más viejo.",
-            "title": "Mas Antiguo S",
-            "type": "integer"
-          },
-          "sin_acuse": {
-            "description": "De los enviados, los que ya excedieron su plazo.",
-            "title": "Sin Acuse",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "canal",
-          "enviados",
-          "acusados",
-          "sin_acuse",
-          "mas_antiguo_s",
-          "hay_brecha"
-        ],
-        "title": "BrechaSalida",
-        "type": "object"
-      },
-      "CifrasSalida": {
-        "description": "Cifras control del objeto depositado: lo que el receptor debe poder reproducir.",
-        "properties": {
-          "consumido": {
-            "description": "Si el receptor ya leyó el lote.",
-            "title": "Consumido",
-            "type": "boolean"
-          },
-          "conteo": {
-            "title": "Conteo",
-            "type": "integer"
-          },
-          "filas": {
-            "items": {
-              "$ref": "#/components/schemas/FilaCifrasSalida"
-            },
-            "title": "Filas",
-            "type": "array"
-          },
-          "hash_lote": {
-            "description": "SHA-256 de los hashes de fila ordenados por referencia.",
-            "title": "Hash Lote",
-            "type": "string"
-          },
-          "lote": {
-            "title": "Lote",
-            "type": "string"
-          },
-          "moneda": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Moneda"
-          },
-          "suma": {
-            "description": "Suma de los importes ya redondeados, como texto.",
-            "title": "Suma",
-            "type": "string"
-          }
-        },
-        "required": [
-          "lote",
-          "moneda",
-          "conteo",
-          "suma",
-          "hash_lote",
-          "consumido",
-          "filas"
-        ],
-        "title": "CifrasSalida",
-        "type": "object"
-      },
-      "CorridaSalida": {
-        "properties": {
-          "acusados": {
-            "title": "Acusados",
-            "type": "integer"
-          },
-          "detalle": {
-            "title": "Detalle",
-            "type": "string"
-          },
-          "enrutados": {
-            "title": "Enrutados",
-            "type": "integer"
-          },
-          "enviados": {
-            "title": "Enviados",
-            "type": "integer"
-          },
-          "estado": {
-            "title": "Estado",
-            "type": "string"
-          },
-          "fallidos": {
-            "title": "Fallidos",
-            "type": "integer"
-          },
-          "hizo_algo": {
-            "description": "Falso cuando la corrida terminó sin procesar nada: verde ≠ hizo algo.",
-            "title": "Hizo Algo",
-            "type": "boolean"
-          },
-          "id": {
-            "title": "Id",
-            "type": "string"
-          },
-          "iniciada_en": {
-            "format": "date-time",
-            "title": "Iniciada En",
-            "type": "string"
-          },
-          "procesados": {
-            "description": "enviados + acusados.",
-            "title": "Procesados",
-            "type": "integer"
-          },
-          "rechazados": {
-            "title": "Rechazados",
-            "type": "integer"
-          },
-          "terminada_en": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Terminada En"
-          },
-          "tomados": {
-            "title": "Tomados",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "id",
-          "iniciada_en",
-          "terminada_en",
-          "tomados",
-          "enrutados",
-          "enviados",
-          "acusados",
-          "rechazados",
-          "fallidos",
-          "procesados",
-          "estado",
-          "hizo_algo",
-          "detalle"
-        ],
-        "title": "CorridaSalida",
-        "type": "object"
-      },
-      "EntregaSalida": {
-        "properties": {
-          "acusado_en": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Acusado En"
-          },
-          "acuse_por": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Quién confirmó. Sin actor no hay acuse.",
-            "title": "Acuse Por"
-          },
-          "canal": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Nulo cuando no hubo regla que lo enrutara.",
-            "title": "Canal"
-          },
-          "creado_en": {
-            "format": "date-time",
-            "title": "Creado En",
-            "type": "string"
-          },
-          "detalle": {
-            "title": "Detalle",
-            "type": "string"
-          },
-          "entregado": {
-            "description": "Verdadero SÓLO si está ACUSADO.",
-            "title": "Entregado",
-            "type": "boolean"
-          },
-          "enviado_en": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Enviado En"
-          },
-          "estado": {
-            "title": "Estado",
-            "type": "string"
-          },
-          "id": {
-            "title": "Id",
-            "type": "string"
-          },
-          "intentos": {
-            "title": "Intentos",
-            "type": "integer"
-          },
-          "lote": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Lote"
-          },
-          "plazo_acuse_s": {
-            "title": "Plazo Acuse S",
-            "type": "integer"
-          },
-          "referencia": {
-            "title": "Referencia",
-            "type": "string"
-          },
-          "trabajo_id": {
-            "title": "Trabajo Id",
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "trabajo_id",
-          "referencia",
-          "canal",
-          "estado",
-          "entregado",
-          "intentos",
-          "plazo_acuse_s",
-          "enviado_en",
-          "acusado_en",
-          "acuse_por",
-          "detalle",
-          "lote",
-          "creado_en"
-        ],
-        "title": "EntregaSalida",
-        "type": "object"
-      },
-      "ErrorSalida": {
-        "description": "Error con motivo legible: un código sin explicación obliga a adivinar.",
-        "properties": {
-          "detail": {
-            "description": "Qué pasó y qué hacer.",
-            "title": "Detail",
-            "type": "string"
-          }
-        },
-        "required": [
-          "detail"
-        ],
-        "title": "ErrorSalida",
-        "type": "object"
-      },
-      "EstadoEntrega": {
-        "enum": [
-          "PENDIENTE",
-          "ENVIADO",
-          "ACUSADO",
-          "SIN_ACUSE",
-          "FALLIDO",
-          "RECHAZADO"
-        ],
-        "title": "EstadoEntrega",
-        "type": "string"
-      },
-      "EventoSalida": {
-        "properties": {
-          "actor": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Actor"
-          },
-          "detalle": {
-            "title": "Detalle",
-            "type": "string"
-          },
-          "entrega_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Entrega Id"
-          },
-          "id": {
-            "title": "Id",
-            "type": "integer"
-          },
-          "momento": {
-            "format": "date-time",
-            "title": "Momento",
-            "type": "string"
-          },
-          "tipo": {
-            "title": "Tipo",
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "entrega_id",
-          "momento",
-          "tipo",
-          "actor",
-          "detalle"
-        ],
-        "title": "EventoSalida",
-        "type": "object"
-      },
-      "FilaCifrasSalida": {
-        "properties": {
-          "hash": {
-            "description": "SHA-256 del JSON canónico [referencia, importe, moneda].",
-            "title": "Hash",
-            "type": "string"
-          },
-          "importe": {
-            "description": "Decimal a centavos, como texto (nunca float).",
-            "title": "Importe",
-            "type": "string"
-          },
-          "moneda": {
-            "title": "Moneda",
-            "type": "string"
-          },
-          "referencia": {
-            "description": "Llave estable de la fila (folio de negocio).",
-            "title": "Referencia",
-            "type": "string"
-          }
-        },
-        "required": [
-          "referencia",
-          "importe",
-          "moneda",
-          "hash"
-        ],
-        "title": "FilaCifrasSalida",
-        "type": "object"
-      },
-      "HTTPValidationError": {
-        "properties": {
-          "detail": {
-            "items": {
-              "$ref": "#/components/schemas/ValidationError"
-            },
-            "title": "Detail",
-            "type": "array"
-          }
-        },
-        "title": "HTTPValidationError",
-        "type": "object"
-      },
-      "PeticionConsumo": {
-        "additionalProperties": false,
-        "properties": {
-          "canal": {
-            "default": "asincrono-b",
-            "description": "Canal cuyo receptor va a leer. Por omisión el asíncrono, que es donde nace la brecha y por tanto lo que casi siempre se quiere consumir.",
-            "title": "Canal",
-            "type": "string"
-          },
-          "n": {
-            "anyOf": [
-              {
-                "minimum": 0.0,
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Cuántos objetos leer (o cuántos lotes, si el canal agrupa). Nulo = todo lo pendiente.",
-            "title": "N"
-          }
-        },
-        "title": "PeticionConsumo",
-        "type": "object"
-      },
-      "PeticionCorrida": {
-        "additionalProperties": false,
-        "properties": {
-          "incluir_sin_ruta": {
-            "default": false,
-            "description": "Agrega trabajos con un destino que ninguna regla cubre. Terminan en RECHAZADO, que es lo que debe pasar: no hay canal por omisión.",
-            "title": "Incluir Sin Ruta",
-            "type": "boolean"
-          },
-          "n": {
-            "default": 6,
-            "description": "Cuántos trabajos generar.",
-            "maximum": 500.0,
-            "minimum": 0.0,
-            "title": "N",
-            "type": "integer"
-          }
-        },
-        "title": "PeticionCorrida",
-        "type": "object"
-      },
-      "PeticionVencimiento": {
-        "additionalProperties": false,
-        "properties": {
-          "avance_s": {
-            "anyOf": [
-              {
-                "maximum": 315360000.0,
-                "minimum": 1.0,
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Segundos que avanza el reloj lógico. Por omisión, lo justo para que venza el plazo más largo que haya en vuelo.",
-            "title": "Avance S"
-          }
-        },
-        "title": "PeticionVencimiento",
-        "type": "object"
-      },
-      "RespuestaConsumo": {
-        "properties": {
-          "actor": {
-            "title": "Actor",
-            "type": "string"
-          },
-          "acuses_registrados": {
-            "description": "Entregas que pasaron de ENVIADO a ACUSADO gracias a esta lectura.",
-            "title": "Acuses Registrados",
-            "type": "integer"
-          },
-          "canal": {
-            "title": "Canal",
-            "type": "string"
-          },
-          "consumidas": {
-            "description": "Objetos o lotes que el receptor leyó.",
-            "title": "Consumidas",
-            "type": "integer"
-          },
-          "nota": {
-            "title": "Nota",
-            "type": "string"
-          },
-          "pendientes_restantes": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Pendientes Restantes"
-          },
-          "referencias": {
-            "items": {
-              "type": "string"
-            },
-            "title": "Referencias",
-            "type": "array"
-          }
-        },
-        "required": [
-          "canal",
-          "referencias",
-          "consumidas",
-          "acuses_registrados",
-          "pendientes_restantes",
-          "actor",
-          "nota"
-        ],
-        "title": "RespuestaConsumo",
-        "type": "object"
-      },
-      "RespuestaReinicio": {
-        "properties": {
-          "reiniciado": {
-            "default": true,
-            "title": "Reiniciado",
-            "type": "boolean"
-          },
-          "resumen": {
-            "$ref": "#/components/schemas/ResumenSalida"
-          },
-          "siembra": {
-            "additionalProperties": true,
-            "title": "Siembra",
-            "type": "object"
-          }
-        },
-        "required": [
-          "siembra",
-          "resumen"
-        ],
-        "title": "RespuestaReinicio",
-        "type": "object"
-      },
-      "RespuestaVencimiento": {
-        "properties": {
-          "avance_s": {
-            "title": "Avance S",
-            "type": "integer"
-          },
-          "brechas": {
-            "items": {
-              "$ref": "#/components/schemas/BrechaSalida"
-            },
-            "title": "Brechas",
-            "type": "array"
-          },
-          "marcadas": {
-            "title": "Marcadas",
-            "type": "integer"
-          },
-          "nota": {
-            "title": "Nota",
-            "type": "string"
-          }
-        },
-        "required": [
-          "avance_s",
-          "marcadas",
-          "nota",
-          "brechas"
-        ],
-        "title": "RespuestaVencimiento",
-        "type": "object"
-      },
-      "ResumenSalida": {
-        "description": "Fotografía global. Los dos números viajan JUNTOS a propósito.",
-        "properties": {
-          "brecha_de_acuse": {
-            "title": "Brecha De Acuse",
-            "type": "integer"
-          },
-          "brechas": {
-            "items": {
-              "$ref": "#/components/schemas/BrechaSalida"
-            },
-            "title": "Brechas",
-            "type": "array"
-          },
-          "con_problema": {
-            "title": "Con Problema",
-            "type": "integer"
-          },
-          "entregadas": {
-            "title": "Entregadas",
-            "type": "integer"
-          },
-          "entregado_confirmado": {
-            "description": "ACUSADO. Lo único que alguien del otro lado confirmó.",
-            "title": "Entregado Confirmado",
-            "type": "integer"
-          },
-          "entregado_segun_emisor": {
-            "description": "ENVIADO + ACUSADO. Lo que reportaría quien cuenta lo que salió.",
-            "title": "Entregado Segun Emisor",
-            "type": "integer"
-          },
-          "nota": {
-            "title": "Nota",
-            "type": "string"
-          },
-          "por_estado": {
-            "additionalProperties": {
-              "type": "integer"
-            },
-            "title": "Por Estado",
-            "type": "object"
-          },
-          "sin_acuse": {
-            "title": "Sin Acuse",
-            "type": "integer"
-          },
-          "total": {
-            "title": "Total",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "total",
-          "por_estado",
-          "entregadas",
-          "entregado_segun_emisor",
-          "entregado_confirmado",
-          "brecha_de_acuse",
-          "sin_acuse",
-          "con_problema",
-          "nota",
-          "brechas"
-        ],
-        "title": "ResumenSalida",
-        "type": "object"
-      },
-      "Salud": {
-        "properties": {
-          "estado": {
-            "const": "ok",
-            "default": "ok",
-            "title": "Estado",
-            "type": "string"
-          },
-          "servicio": {
-            "const": "Acuse API",
-            "default": "Acuse API",
-            "title": "Servicio",
-            "type": "string"
-          },
-          "tesis": {
-            "default": "Una entrega sin acuse verificable no es una entrega.",
-            "title": "Tesis",
-            "type": "string"
-          },
-          "version": {
-            "title": "Version",
-            "type": "string"
-          }
-        },
-        "required": [
-          "version"
-        ],
-        "title": "Salud",
-        "type": "object"
-      },
-      "ValidationError": {
-        "properties": {
-          "ctx": {
-            "title": "Context",
-            "type": "object"
-          },
-          "input": {
-            "title": "Input"
-          },
-          "loc": {
-            "items": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "integer"
-                }
-              ]
-            },
-            "title": "Location",
-            "type": "array"
-          },
-          "msg": {
-            "title": "Message",
-            "type": "string"
-          },
-          "type": {
-            "title": "Error Type",
-            "type": "string"
-          }
-        },
-        "required": [
-          "loc",
-          "msg",
-          "type"
-        ],
-        "title": "ValidationError",
-        "type": "object"
-      }
-    }
-  },
+  "openapi": "3.1.0",
   "info": {
-    "description": "Acuse API — la capa HTTP que hace visible lo que el núcleo ya sabe.\n\nUn tablero puede mentir de tres formas, y esta API está diseñada para que ninguna\nquepa:\n\n  1. **enviado ≠ recibido.** ``/api/resumen`` publica los DOS números juntos:\n     ``entregado_segun_emisor`` y ``entregado_confirmado``. Publicar sólo el primero\n     es la forma más común del fallo; publicarlos juntos convierte la diferencia en\n     una cifra que alguien tiene que explicar.\n  2. **ruteo por omisión.** Las entregas sin ruta salen en ``/api/entregas`` con\n     ``canal: null``, estado RECHAZADO y el motivo textual. No se filtran ni se\n     agrupan en un «otros».\n  3. **verde ≠ hizo algo.** ``/api/corridas`` devuelve el estado real de cada corrida,\n     incluido SIN_INSUMO, y un ``hizo_algo`` explícito. Un tablero que sólo sabe decir\n     verde/rojo no puede distinguir «procesé todo» de «no había nada», y por eso nadie\n     hace esa pregunta.\n\nLos endpoints ``/api/simular/*`` existen para poder provocar cada patología en vivo,\nsin esperar a que ocurra sola.\n",
-    "summary": "Una entrega sin acuse verificable no es una entrega.",
     "title": "Acuse API",
+    "summary": "Una entrega sin acuse verificable no es una entrega.",
+    "description": "Acuse API — la capa HTTP que hace visible lo que el núcleo ya sabe.\n\nUn tablero puede mentir de tres formas, y esta API está diseñada para que ninguna\nquepa:\n\n  1. **enviado ≠ recibido.** ``/api/resumen`` publica los DOS números juntos:\n     ``entregado_segun_emisor`` y ``entregado_confirmado``. Publicar sólo el primero\n     es la forma más común del fallo; publicarlos juntos convierte la diferencia en\n     una cifra que alguien tiene que explicar.\n  2. **ruteo por omisión.** Las entregas sin ruta salen en ``/api/entregas`` con\n     ``canal: null``, estado RECHAZADO y el motivo textual. No se filtran ni se\n     agrupan en un «otros».\n  3. **verde ≠ hizo algo.** ``/api/corridas`` devuelve el estado real de cada corrida,\n     incluido SIN_INSUMO, y un ``hizo_algo`` explícito. Un tablero que sólo sabe decir\n     verde/rojo no puede distinguir «procesé todo» de «no había nada», y por eso nadie\n     hace esa pregunta.\n\nLos endpoints ``/api/simular/*`` existen para poder provocar cada patología en vivo,\nsin esperar a que ocurra sola.\n",
     "version": "0.2.0"
   },
-  "openapi": "3.1.0",
   "paths": {
+    "/health": {
+      "get": {
+        "tags": [
+          "operación"
+        ],
+        "summary": "Salud",
+        "description": "Vivo o no. Deliberadamente NO afirma que el sistema esté sano.\n\nUn `/health` en verde dice que el proceso responde, nada más. Si además dijera\n«todo bien», sería otro éxito silencioso: la brecha de acuse se mira en\n`/api/resumen`, no aquí.",
+        "operationId": "salud_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Salud"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/resumen": {
+      "get": {
+        "tags": [
+          "tablero"
+        ],
+        "summary": "Obtener Resumen",
+        "description": "Conteo global por estado + la brecha de acuse por canal.",
+        "operationId": "obtener_resumen_api_resumen_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResumenSalida"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/brechas": {
       "get": {
+        "tags": [
+          "tablero"
+        ],
+        "summary": "Obtener Brechas",
         "description": "Brecha de acuse por canal, como recurso propio.\n\nExiste además de /api/resumen porque el tablero la refresca por separado tras\ncada simulacion: es el numero que se mueve cuando el receptor consume.",
         "operationId": "obtener_brechas_api_brechas_get",
         "responses": {
           "200": {
+            "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
                   "items": {
                     "$ref": "#/components/schemas/BrechaSalida"
                   },
-                  "title": "Response Obtener Brechas Api Brechas Get",
-                  "type": "array"
+                  "type": "array",
+                  "title": "Response Obtener Brechas Api Brechas Get"
                 }
               }
-            },
-            "description": "Successful Response"
+            }
           }
-        },
-        "summary": "Obtener Brechas",
-        "tags": [
-          "tablero"
-        ]
+        }
       }
     },
-    "/api/corridas": {
+    "/api/lotes/{lote}/cifras": {
       "get": {
-        "description": "Últimas corridas con su desenlace real, SIN_INSUMO incluido.\n\nEs la vista que impide leer «terminó bien» como «hizo algo».",
-        "operationId": "listar_corridas_api_corridas_get",
+        "tags": [
+          "tablero"
+        ],
+        "summary": "Obtener Cifras De Lote",
+        "description": "Cifras control (conteo, suma en Decimal y hash por fila) del lote depositado.\n\nSe calculan sobre lo que el receptor leería del objeto del lote, no sobre lo que el\nemisor cree haber mandado: son las que el emisor tiene que poder igualar con las que\ndeclaró. La conciliación completa vive en `acuse.conciliador.conciliar_lote`.",
+        "operationId": "obtener_cifras_de_lote_api_lotes__lote__cifras_get",
         "parameters": [
           {
-            "in": "query",
-            "name": "limit",
-            "required": false,
+            "name": "lote",
+            "in": "path",
+            "required": true,
             "schema": {
-              "default": 20,
-              "maximum": 200,
-              "minimum": 1,
-              "title": "Limit",
-              "type": "integer"
+              "type": "string",
+              "title": "Lote"
             }
           }
         ],
         "responses": {
           "200": {
+            "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/CorridaSalida"
-                  },
-                  "title": "Response Listar Corridas Api Corridas Get",
-                  "type": "array"
+                  "$ref": "#/components/schemas/CifrasSalida"
                 }
               }
-            },
-            "description": "Successful Response"
+            }
+          },
+          "404": {
+            "description": "No hay objeto depositado para ese lote.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorSalida"
+                }
+              }
+            }
           },
           "422": {
+            "description": "Validation Error",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
-            },
-            "description": "Validation Error"
+            }
           }
-        },
-        "summary": "Listar Corridas",
-        "tags": [
-          "tablero"
-        ]
+        }
       }
     },
     "/api/entregas": {
       "get": {
+        "tags": [
+          "tablero"
+        ],
+        "summary": "Listar Entregas",
         "description": "Entregas, de la más reciente a la más vieja.\n\nLas RECHAZADO aparecen con ``canal: null``. No se ocultan ni se reagrupan: una\nentrega que nadie supo enrutar es exactamente la que hay que ver.",
         "operationId": "listar_entregas_api_entregas_get",
         "parameters": [
           {
-            "description": "Filtro por estado.",
-            "in": "query",
             "name": "estado",
+            "in": "query",
             "required": false,
             "schema": {
               "anyOf": [
@@ -849,12 +154,12 @@
               ],
               "description": "Filtro por estado.",
               "title": "Estado"
-            }
+            },
+            "description": "Filtro por estado."
           },
           {
-            "description": "Filtro por canal.",
-            "in": "query",
             "name": "canal",
+            "in": "query",
             "required": false,
             "schema": {
               "anyOf": [
@@ -867,62 +172,112 @@
               ],
               "description": "Filtro por canal.",
               "title": "Canal"
-            }
+            },
+            "description": "Filtro por canal."
           },
           {
-            "in": "query",
             "name": "limit",
+            "in": "query",
             "required": false,
             "schema": {
-              "default": 100,
+              "type": "integer",
               "maximum": 1000,
               "minimum": 1,
-              "title": "Limit",
-              "type": "integer"
+              "default": 100,
+              "title": "Limit"
             }
           }
         ],
         "responses": {
           "200": {
+            "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
+                  "type": "array",
                   "items": {
                     "$ref": "#/components/schemas/EntregaSalida"
                   },
-                  "title": "Response Listar Entregas Api Entregas Get",
-                  "type": "array"
+                  "title": "Response Listar Entregas Api Entregas Get"
                 }
               }
-            },
-            "description": "Successful Response"
+            }
           },
           "422": {
+            "description": "Validation Error",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
-            },
-            "description": "Validation Error"
+            }
           }
-        },
-        "summary": "Listar Entregas",
+        }
+      }
+    },
+    "/api/corridas": {
+      "get": {
         "tags": [
           "tablero"
-        ]
+        ],
+        "summary": "Listar Corridas",
+        "description": "Últimas corridas con su desenlace real, SIN_INSUMO incluido.\n\nEs la vista que impide leer «terminó bien» como «hizo algo».",
+        "operationId": "listar_corridas_api_corridas_get",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "default": 20,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CorridaSalida"
+                  },
+                  "title": "Response Listar Corridas Api Corridas Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/eventos": {
       "get": {
+        "tags": [
+          "tablero"
+        ],
+        "summary": "Listar Eventos",
         "description": "Bitácora append-only: qué pasó, cuándo y quién lo hizo.\n\nIncluye los hechos que no corresponden a ninguna entrega conocida —un acuse que\ncita una referencia que nadie envió, por ejemplo—. Descartarlos en silencio sería\notro éxito silencioso.",
         "operationId": "listar_eventos_api_eventos_get",
         "parameters": [
           {
-            "description": "Bitácora de una entrega.",
-            "in": "query",
             "name": "entrega_id",
+            "in": "query",
             "required": false,
             "schema": {
               "anyOf": [
@@ -935,152 +290,133 @@
               ],
               "description": "Bitácora de una entrega.",
               "title": "Entrega Id"
-            }
+            },
+            "description": "Bitácora de una entrega."
           },
           {
-            "in": "query",
             "name": "limit",
+            "in": "query",
             "required": false,
             "schema": {
-              "default": 200,
+              "type": "integer",
               "maximum": 2000,
               "minimum": 1,
-              "title": "Limit",
-              "type": "integer"
+              "default": 200,
+              "title": "Limit"
             }
           }
         ],
         "responses": {
           "200": {
+            "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
+                  "type": "array",
                   "items": {
                     "$ref": "#/components/schemas/EventoSalida"
                   },
-                  "title": "Response Listar Eventos Api Eventos Get",
-                  "type": "array"
+                  "title": "Response Listar Eventos Api Eventos Get"
                 }
               }
-            },
-            "description": "Successful Response"
+            }
           },
           "422": {
+            "description": "Validation Error",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Listar Eventos",
-        "tags": [
-          "tablero"
-        ]
-      }
-    },
-    "/api/lotes/{lote}/cifras": {
-      "get": {
-        "description": "Cifras control (conteo, suma en Decimal y hash por fila) del lote depositado.\n\nSe calculan sobre lo que el receptor leería del objeto del lote, no sobre lo que el\nemisor cree haber mandado: son las que el emisor tiene que poder igualar con las que\ndeclaró. La conciliación completa vive en `acuse.conciliador.conciliar_lote`.",
-        "operationId": "obtener_cifras_de_lote_api_lotes__lote__cifras_get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "lote",
-            "required": true,
-            "schema": {
-              "title": "Lote",
-              "type": "string"
             }
           }
+        }
+      }
+    },
+    "/api/simular/corrida": {
+      "post": {
+        "tags": [
+          "simulación"
         ],
+        "summary": "Simular Corrida",
+        "description": "Genera ``n`` trabajos y los procesa.\n\nLos que van al canal síncrono se acusan solos; los asíncronos quedan ENVIADO y\nengordan la brecha hasta que alguien los consuma. Con ``incluir_sin_ruta`` se\nañaden trabajos que ninguna regla cubre, para ver el rechazo ruidoso.",
+        "operationId": "simular_corrida_api_simular_corrida_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PeticionCorrida",
+                "default": {
+                  "n": 6,
+                  "incluir_sin_ruta": false
+                }
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
+            "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CifrasSalida"
+                  "$ref": "#/components/schemas/CorridaSalida"
                 }
               }
-            },
-            "description": "Successful Response"
+            }
           },
-          "404": {
+          "400": {
+            "description": "El cuerpo no es JSON legible en UTF-8.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorSalida"
                 }
               }
-            },
-            "description": "No hay objeto depositado para ese lote."
+            }
           },
           "422": {
+            "description": "Validation Error",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
-            },
-            "description": "Validation Error"
+            }
           }
-        },
-        "summary": "Obtener Cifras De Lote",
-        "tags": [
-          "tablero"
-        ]
+        }
       }
     },
-    "/api/reiniciar": {
+    "/api/simular/corrida-vacia": {
       "post": {
-        "description": "Vuelve al escenario sembrado: base limpia y buzones vacíos.",
-        "operationId": "reiniciar_api_reiniciar_post",
+        "tags": [
+          "simulación"
+        ],
+        "summary": "Simular Corrida Vacia",
+        "description": "Procesa una lista vacía. Termina SIN_INSUMO, jamás EXITOSA.\n\nEs la patología 3 en un clic: el proceso corrió, no falló nada, y no hizo nada.\nUn tablero binario lo pintaría de verde y el frente se caería durante días.",
+        "operationId": "simular_corrida_vacia_api_simular_corrida_vacia_post",
         "responses": {
           "200": {
+            "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/RespuestaReinicio"
+                  "$ref": "#/components/schemas/CorridaSalida"
                 }
               }
-            },
-            "description": "Successful Response"
+            }
           }
-        },
-        "summary": "Reiniciar",
-        "tags": [
-          "operación"
-        ]
-      }
-    },
-    "/api/resumen": {
-      "get": {
-        "description": "Conteo global por estado + la brecha de acuse por canal.",
-        "operationId": "obtener_resumen_api_resumen_get",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ResumenSalida"
-                }
-              }
-            },
-            "description": "Successful Response"
-          }
-        },
-        "summary": "Obtener Resumen",
-        "tags": [
-          "tablero"
-        ]
+        }
       }
     },
     "/api/simular/consumir": {
       "post": {
+        "tags": [
+          "simulación"
+        ],
+        "summary": "Simular Consumo",
         "description": "El receptor asíncrono lee su buzón y de ahí —y sólo de ahí— nace el acuse.\n\nDevuelve cuántas entregas pasaron de ENVIADO a ACUSADO. Ese número es la única\nforma legítima de que la brecha baje: marcarla como resuelta sin que nadie lea\nsería fabricar la evidencia que este proyecto existe para exigir.",
         "operationId": "simular_consumo_api_simular_consumir_post",
         "requestBody": {
@@ -1095,141 +431,64 @@
         },
         "responses": {
           "200": {
+            "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RespuestaConsumo"
                 }
               }
-            },
-            "description": "Successful Response"
+            }
           },
           "400": {
+            "description": "El cuerpo no es JSON legible en UTF-8.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorSalida"
                 }
               }
-            },
-            "description": "El cuerpo no es JSON legible en UTF-8."
+            }
           },
           "404": {
+            "description": "No hay canal con ese nombre.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorSalida"
                 }
               }
-            },
-            "description": "No hay canal con ese nombre."
+            }
           },
           "409": {
+            "description": "El canal es síncrono: no tiene buzón que consumir.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorSalida"
                 }
               }
-            },
-            "description": "El canal es síncrono: no tiene buzón que consumir."
+            }
           },
           "422": {
+            "description": "Validation Error",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Simular Consumo",
-        "tags": [
-          "simulación"
-        ]
-      }
-    },
-    "/api/simular/corrida": {
-      "post": {
-        "description": "Genera ``n`` trabajos y los procesa.\n\nLos que van al canal síncrono se acusan solos; los asíncronos quedan ENVIADO y\nengordan la brecha hasta que alguien los consuma. Con ``incluir_sin_ruta`` se\nañaden trabajos que ninguna regla cubre, para ver el rechazo ruidoso.",
-        "operationId": "simular_corrida_api_simular_corrida_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PeticionCorrida",
-                "default": {
-                  "incluir_sin_ruta": false,
-                  "n": 6
                 }
               }
             }
           }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CorridaSalida"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorSalida"
-                }
-              }
-            },
-            "description": "El cuerpo no es JSON legible en UTF-8."
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Simular Corrida",
-        "tags": [
-          "simulación"
-        ]
-      }
-    },
-    "/api/simular/corrida-vacia": {
-      "post": {
-        "description": "Procesa una lista vacía. Termina SIN_INSUMO, jamás EXITOSA.\n\nEs la patología 3 en un clic: el proceso corrió, no falló nada, y no hizo nada.\nUn tablero binario lo pintaría de verde y el frente se caería durante días.",
-        "operationId": "simular_corrida_vacia_api_simular_corrida_vacia_post",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CorridaSalida"
-                }
-              }
-            },
-            "description": "Successful Response"
-          }
-        },
-        "summary": "Simular Corrida Vacia",
-        "tags": [
-          "simulación"
-        ]
+        }
       }
     },
     "/api/simular/vencer": {
       "post": {
+        "tags": [
+          "simulación"
+        ],
+        "summary": "Simular Vencimiento",
         "description": "Adelanta el reloj lógico y marca SIN_ACUSE lo que ya venció.\n\nNo espera a que pase el tiempo real: mueve el instante con el que se evalúa el\nplazo. Las entregas dejan de estar «en camino» y pasan a ser un incumplimiento\ncon nombre, canal y antigüedad.\n\nMarcarlas NO reduce la brecha —siguen contando— porque mirar un problema no lo\nresuelve. Sólo un acuse lo hace.",
         "operationId": "simular_vencimiento_api_simular_vencer_post",
         "requestBody": {
@@ -1251,62 +510,803 @@
         },
         "responses": {
           "200": {
+            "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RespuestaVencimiento"
                 }
               }
-            },
-            "description": "Successful Response"
+            }
           },
           "400": {
+            "description": "El cuerpo no es JSON legible en UTF-8.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorSalida"
                 }
               }
-            },
-            "description": "El cuerpo no es JSON legible en UTF-8."
+            }
           },
           "422": {
+            "description": "Validation Error",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
-            },
-            "description": "Validation Error"
+            }
           }
-        },
-        "summary": "Simular Vencimiento",
-        "tags": [
-          "simulación"
-        ]
+        }
       }
     },
-    "/health": {
-      "get": {
-        "description": "Vivo o no. Deliberadamente NO afirma que el sistema esté sano.\n\nUn `/health` en verde dice que el proceso responde, nada más. Si además dijera\n«todo bien», sería otro éxito silencioso: la brecha de acuse se mira en\n`/api/resumen`, no aquí.",
-        "operationId": "salud_health_get",
+    "/api/reiniciar": {
+      "post": {
+        "tags": [
+          "operación"
+        ],
+        "summary": "Reiniciar",
+        "description": "Vuelve al escenario sembrado: base limpia y buzones vacíos.",
+        "operationId": "reiniciar_api_reiniciar_post",
         "responses": {
           "200": {
+            "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Salud"
+                  "$ref": "#/components/schemas/RespuestaReinicio"
                 }
               }
-            },
-            "description": "Successful Response"
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "BrechaSalida": {
+        "properties": {
+          "canal": {
+            "type": "string",
+            "title": "Canal"
+          },
+          "enviados": {
+            "type": "integer",
+            "title": "Enviados",
+            "description": "Salió por el canal y todavía no tiene acuse."
+          },
+          "acusados": {
+            "type": "integer",
+            "title": "Acusados",
+            "description": "El receptor confirmó. Sólo esto son entregas."
+          },
+          "sin_acuse": {
+            "type": "integer",
+            "title": "Sin Acuse",
+            "description": "De los enviados, los que ya excedieron su plazo."
+          },
+          "mas_antiguo_s": {
+            "type": "integer",
+            "title": "Mas Antiguo S",
+            "description": "Antigüedad del envío sin acuse más viejo."
+          },
+          "hay_brecha": {
+            "type": "boolean",
+            "title": "Hay Brecha"
           }
         },
-        "summary": "Salud",
-        "tags": [
-          "operación"
-        ]
+        "type": "object",
+        "required": [
+          "canal",
+          "enviados",
+          "acusados",
+          "sin_acuse",
+          "mas_antiguo_s",
+          "hay_brecha"
+        ],
+        "title": "BrechaSalida",
+        "description": "Distancia entre «lo mandé» y «lo tienen», por canal."
+      },
+      "CifrasSalida": {
+        "properties": {
+          "lote": {
+            "type": "string",
+            "title": "Lote"
+          },
+          "moneda": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Moneda"
+          },
+          "conteo": {
+            "type": "integer",
+            "title": "Conteo"
+          },
+          "suma": {
+            "type": "string",
+            "title": "Suma",
+            "description": "Suma de los importes ya redondeados, como texto."
+          },
+          "hash_lote": {
+            "type": "string",
+            "title": "Hash Lote",
+            "description": "SHA-256 de los hashes de fila ordenados por referencia."
+          },
+          "consumido": {
+            "type": "boolean",
+            "title": "Consumido",
+            "description": "Si el receptor ya leyó el lote."
+          },
+          "filas": {
+            "items": {
+              "$ref": "#/components/schemas/FilaCifrasSalida"
+            },
+            "type": "array",
+            "title": "Filas"
+          }
+        },
+        "type": "object",
+        "required": [
+          "lote",
+          "moneda",
+          "conteo",
+          "suma",
+          "hash_lote",
+          "consumido",
+          "filas"
+        ],
+        "title": "CifrasSalida",
+        "description": "Cifras control del objeto depositado: lo que el receptor debe poder reproducir."
+      },
+      "CorridaSalida": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "iniciada_en": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Iniciada En"
+          },
+          "terminada_en": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Terminada En"
+          },
+          "tomados": {
+            "type": "integer",
+            "title": "Tomados"
+          },
+          "enrutados": {
+            "type": "integer",
+            "title": "Enrutados"
+          },
+          "enviados": {
+            "type": "integer",
+            "title": "Enviados"
+          },
+          "acusados": {
+            "type": "integer",
+            "title": "Acusados"
+          },
+          "rechazados": {
+            "type": "integer",
+            "title": "Rechazados"
+          },
+          "fallidos": {
+            "type": "integer",
+            "title": "Fallidos"
+          },
+          "procesados": {
+            "type": "integer",
+            "title": "Procesados",
+            "description": "enviados + acusados."
+          },
+          "estado": {
+            "type": "string",
+            "title": "Estado"
+          },
+          "hizo_algo": {
+            "type": "boolean",
+            "title": "Hizo Algo",
+            "description": "Falso cuando la corrida terminó sin procesar nada: verde ≠ hizo algo."
+          },
+          "detalle": {
+            "type": "string",
+            "title": "Detalle"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "iniciada_en",
+          "terminada_en",
+          "tomados",
+          "enrutados",
+          "enviados",
+          "acusados",
+          "rechazados",
+          "fallidos",
+          "procesados",
+          "estado",
+          "hizo_algo",
+          "detalle"
+        ],
+        "title": "CorridaSalida"
+      },
+      "EntregaSalida": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "trabajo_id": {
+            "type": "string",
+            "title": "Trabajo Id"
+          },
+          "referencia": {
+            "type": "string",
+            "title": "Referencia"
+          },
+          "canal": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Canal",
+            "description": "Nulo cuando no hubo regla que lo enrutara."
+          },
+          "estado": {
+            "type": "string",
+            "title": "Estado"
+          },
+          "entregado": {
+            "type": "boolean",
+            "title": "Entregado",
+            "description": "Verdadero SÓLO si está ACUSADO."
+          },
+          "intentos": {
+            "type": "integer",
+            "title": "Intentos"
+          },
+          "plazo_acuse_s": {
+            "type": "integer",
+            "title": "Plazo Acuse S"
+          },
+          "enviado_en": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Enviado En"
+          },
+          "acusado_en": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Acusado En"
+          },
+          "acuse_por": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Acuse Por",
+            "description": "Quién confirmó. Sin actor no hay acuse."
+          },
+          "detalle": {
+            "type": "string",
+            "title": "Detalle"
+          },
+          "lote": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lote"
+          },
+          "creado_en": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Creado En"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "trabajo_id",
+          "referencia",
+          "canal",
+          "estado",
+          "entregado",
+          "intentos",
+          "plazo_acuse_s",
+          "enviado_en",
+          "acusado_en",
+          "acuse_por",
+          "detalle",
+          "lote",
+          "creado_en"
+        ],
+        "title": "EntregaSalida"
+      },
+      "ErrorSalida": {
+        "properties": {
+          "detail": {
+            "type": "string",
+            "title": "Detail",
+            "description": "Qué pasó y qué hacer."
+          }
+        },
+        "type": "object",
+        "required": [
+          "detail"
+        ],
+        "title": "ErrorSalida",
+        "description": "Error con motivo legible: un código sin explicación obliga a adivinar."
+      },
+      "EstadoEntrega": {
+        "type": "string",
+        "enum": [
+          "PENDIENTE",
+          "ENVIADO",
+          "ACUSADO",
+          "SIN_ACUSE",
+          "FALLIDO",
+          "RECHAZADO"
+        ],
+        "title": "EstadoEntrega"
+      },
+      "EventoSalida": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "entrega_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entrega Id"
+          },
+          "momento": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Momento"
+          },
+          "tipo": {
+            "type": "string",
+            "title": "Tipo"
+          },
+          "actor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actor"
+          },
+          "detalle": {
+            "type": "string",
+            "title": "Detalle"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "entrega_id",
+          "momento",
+          "tipo",
+          "actor",
+          "detalle"
+        ],
+        "title": "EventoSalida"
+      },
+      "FilaCifrasSalida": {
+        "properties": {
+          "referencia": {
+            "type": "string",
+            "title": "Referencia",
+            "description": "Llave estable de la fila (folio de negocio)."
+          },
+          "importe": {
+            "type": "string",
+            "title": "Importe",
+            "description": "Decimal a centavos, como texto (nunca float)."
+          },
+          "moneda": {
+            "type": "string",
+            "title": "Moneda"
+          },
+          "hash": {
+            "type": "string",
+            "title": "Hash",
+            "description": "SHA-256 del JSON canónico [referencia, importe, moneda]."
+          }
+        },
+        "type": "object",
+        "required": [
+          "referencia",
+          "importe",
+          "moneda",
+          "hash"
+        ],
+        "title": "FilaCifrasSalida"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "PeticionConsumo": {
+        "properties": {
+          "canal": {
+            "type": "string",
+            "title": "Canal",
+            "description": "Canal cuyo receptor va a leer. Por omisión el asíncrono, que es donde nace la brecha y por tanto lo que casi siempre se quiere consumir.",
+            "default": "asincrono-b"
+          },
+          "n": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "N",
+            "description": "Cuántos objetos leer (o cuántos lotes, si el canal agrupa). Nulo = todo lo pendiente."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "PeticionConsumo"
+      },
+      "PeticionCorrida": {
+        "properties": {
+          "n": {
+            "type": "integer",
+            "maximum": 500.0,
+            "minimum": 0.0,
+            "title": "N",
+            "description": "Cuántos trabajos generar.",
+            "default": 6
+          },
+          "incluir_sin_ruta": {
+            "type": "boolean",
+            "title": "Incluir Sin Ruta",
+            "description": "Agrega trabajos con un destino que ninguna regla cubre. Terminan en RECHAZADO, que es lo que debe pasar: no hay canal por omisión.",
+            "default": false
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "PeticionCorrida"
+      },
+      "PeticionVencimiento": {
+        "properties": {
+          "avance_s": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 315360000.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avance S",
+            "description": "Segundos que avanza el reloj lógico. Por omisión, lo justo para que venza el plazo más largo que haya en vuelo."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "PeticionVencimiento"
+      },
+      "RespuestaConsumo": {
+        "properties": {
+          "canal": {
+            "type": "string",
+            "title": "Canal"
+          },
+          "referencias": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Referencias"
+          },
+          "consumidas": {
+            "type": "integer",
+            "title": "Consumidas",
+            "description": "Objetos o lotes que el receptor leyó."
+          },
+          "acuses_registrados": {
+            "type": "integer",
+            "title": "Acuses Registrados",
+            "description": "Entregas que pasaron de ENVIADO a ACUSADO gracias a esta lectura."
+          },
+          "pendientes_restantes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pendientes Restantes"
+          },
+          "actor": {
+            "type": "string",
+            "title": "Actor"
+          },
+          "nota": {
+            "type": "string",
+            "title": "Nota"
+          }
+        },
+        "type": "object",
+        "required": [
+          "canal",
+          "referencias",
+          "consumidas",
+          "acuses_registrados",
+          "pendientes_restantes",
+          "actor",
+          "nota"
+        ],
+        "title": "RespuestaConsumo"
+      },
+      "RespuestaReinicio": {
+        "properties": {
+          "reiniciado": {
+            "type": "boolean",
+            "title": "Reiniciado",
+            "default": true
+          },
+          "siembra": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Siembra"
+          },
+          "resumen": {
+            "$ref": "#/components/schemas/ResumenSalida"
+          }
+        },
+        "type": "object",
+        "required": [
+          "siembra",
+          "resumen"
+        ],
+        "title": "RespuestaReinicio"
+      },
+      "RespuestaVencimiento": {
+        "properties": {
+          "avance_s": {
+            "type": "integer",
+            "title": "Avance S"
+          },
+          "marcadas": {
+            "type": "integer",
+            "title": "Marcadas"
+          },
+          "nota": {
+            "type": "string",
+            "title": "Nota"
+          },
+          "brechas": {
+            "items": {
+              "$ref": "#/components/schemas/BrechaSalida"
+            },
+            "type": "array",
+            "title": "Brechas"
+          }
+        },
+        "type": "object",
+        "required": [
+          "avance_s",
+          "marcadas",
+          "nota",
+          "brechas"
+        ],
+        "title": "RespuestaVencimiento"
+      },
+      "ResumenSalida": {
+        "properties": {
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "por_estado": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Por Estado"
+          },
+          "entregadas": {
+            "type": "integer",
+            "title": "Entregadas"
+          },
+          "entregado_segun_emisor": {
+            "type": "integer",
+            "title": "Entregado Segun Emisor",
+            "description": "ENVIADO + ACUSADO. Lo que reportaría quien cuenta lo que salió."
+          },
+          "entregado_confirmado": {
+            "type": "integer",
+            "title": "Entregado Confirmado",
+            "description": "ACUSADO. Lo único que alguien del otro lado confirmó."
+          },
+          "brecha_de_acuse": {
+            "type": "integer",
+            "title": "Brecha De Acuse"
+          },
+          "sin_acuse": {
+            "type": "integer",
+            "title": "Sin Acuse"
+          },
+          "con_problema": {
+            "type": "integer",
+            "title": "Con Problema"
+          },
+          "nota": {
+            "type": "string",
+            "title": "Nota"
+          },
+          "brechas": {
+            "items": {
+              "$ref": "#/components/schemas/BrechaSalida"
+            },
+            "type": "array",
+            "title": "Brechas"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total",
+          "por_estado",
+          "entregadas",
+          "entregado_segun_emisor",
+          "entregado_confirmado",
+          "brecha_de_acuse",
+          "sin_acuse",
+          "con_problema",
+          "nota",
+          "brechas"
+        ],
+        "title": "ResumenSalida",
+        "description": "Fotografía global. Los dos números viajan JUNTOS a propósito."
+      },
+      "Salud": {
+        "properties": {
+          "servicio": {
+            "type": "string",
+            "const": "Acuse API",
+            "title": "Servicio",
+            "default": "Acuse API"
+          },
+          "estado": {
+            "type": "string",
+            "const": "ok",
+            "title": "Estado",
+            "default": "ok"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version"
+          },
+          "tesis": {
+            "type": "string",
+            "title": "Tesis",
+            "default": "Una entrega sin acuse verificable no es una entrega."
+          }
+        },
+        "type": "object",
+        "required": [
+          "version"
+        ],
+        "title": "Salud"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
       }
     }
   }
