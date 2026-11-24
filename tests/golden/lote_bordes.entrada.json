@@ -1,0 +1,161 @@
+{
+  "lote": "corte-golden-2026-11",
+  "descripcion": "Lote de bordes de importe: empates de redondeo, trampas de float, negativos, cero con signo, montos grandes y una referencia no ASCII. Desordenado a propósito: la llave estable es la referencia.",
+  "registros": [
+    {
+      "referencia": "LIQ-G-0025",
+      "importe": "19.999",
+      "moneda": "MXN"
+    },
+    {
+      "referencia": "LIQ-Ñ-0031",
+      "importe": "0.005",
+      "moneda": "MXN"
+    },
+    {
+      "referencia": "LIQ-G-0004",
+      "importe": "-0.004",
+      "moneda": "MXN"
+    },
+    {
+      "referencia": "LIQ-G-0007",
+      "importe": "1.015",
+      "moneda": "MXN"
+    },
+    {
+      "referencia": "LIQ-G-0024",
+      "importe": "0.995",
+      "moneda": "MXN"
+    },
+    {
+      "referencia": "LIQ-G-0018",
+      "importe": "2.718281828",
+      "moneda": "MXN"
+    },
+    {
+      "referencia": "LIQ-G-0011",
+      "importe": "7.1",
+      "moneda": "MXN"
+    },
+    {
+      "referencia": "LIQ-G-0017",
+      "importe": "3.14159",
+      "moneda": "MXN"
+    },
+    {
+      "referencia": "LIQ-G-0021",
+      "importe": "12345.675",
+      "moneda": "MXN"
+    },
+    {
+      "referencia": "LIQ-G-0019",
+      "importe": 0,
+      "moneda": "MXN"
+    },
+    {
+      "referencia": "LIQ-G-0009",
+      "importe": "0.135",
+      "moneda": "MXN"
+    },
+    {
+      "referencia": "LIQ-G-0010",
+      "importe": 1000,
+      "moneda": "MXN"
+    },
+    {
+      "referencia": "LIQ-G-0028",
+      "importe": "1.1",
+      "moneda": "MXN"
+    },
+    {
+      "referencia": "LIQ-G-0012",
+      "importe": "0.10",
+      "moneda": "MXN"
+    },
+    {
+      "referencia": "LIQ-G-0013",
+      "importe": "999999999.995",
+      "moneda": "MXN"
+    },
+    {
+      "referencia": "LIQ-G-0003",
+      "importe": "-0.005",
+      "moneda": "MXN"
+    },
+    {
+      "referencia": "LIQ-G-0008",
+      "importe": "0.125",
+      "moneda": "MXN"
+    },
+    {
+      "referencia": "LIQ-G-0014",
+      "importe": "0.0050000001",
+      "moneda": "MXN"
+    },
+    {
+      "referencia": "LIQ-G-0026",
+      "importe": "-0.0",
+      "moneda": "MXN"
+    },
+    {
+      "referencia": "LIQ-G-0030",
+      "importe": "66.667",
+      "moneda": "MXN"
+    },
+    {
+      "referencia": "LIQ-G-0016",
+      "importe": "-15.505",
+      "moneda": "MXN"
+    },
+    {
+      "referencia": "LIQ-G-0015",
+      "importe": "15.50",
+      "moneda": "MXN"
+    },
+    {
+      "referencia": "LIQ-G-0020",
+      "importe": "0.01",
+      "moneda": "MXN"
+    },
+    {
+      "referencia": "LIQ-G-0005",
+      "importe": "2.675",
+      "moneda": "MXN"
+    },
+    {
+      "referencia": "LIQ-G-0023",
+      "importe": "0.994",
+      "moneda": "MXN"
+    },
+    {
+      "referencia": "LIQ-G-0029",
+      "importe": "33.333",
+      "moneda": "MXN"
+    },
+    {
+      "referencia": "LIQ-G-0002",
+      "importe": "0.0049",
+      "moneda": "MXN"
+    },
+    {
+      "referencia": "LIQ-G-0001",
+      "importe": "0.005",
+      "moneda": "MXN"
+    },
+    {
+      "referencia": "LIQ-G-0022",
+      "importe": "88.885",
+      "moneda": "MXN"
+    },
+    {
+      "referencia": "LIQ-G-0006",
+      "importe": "1.005",
+      "moneda": "MXN"
+    },
+    {
+      "referencia": "LIQ-G-0027",
+      "importe": "250",
+      "moneda": "MXN"
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "lote": "corte-C-00001",
+  "descripcion": "El lote del escenario sembrado de la demo (acuse.demo.trabajos_sembrados): folios 25 a 28, importe 1000 + 7 × folio.",
+  "registros": [
+    {
+      "referencia": "LIQ-00025",
+      "importe": 1175,
+      "moneda": "MXN"
+    },
+    {
+      "referencia": "LIQ-00026",
+      "importe": 1182,
+      "moneda": "MXN"
+    },
+    {
+      "referencia": "LIQ-00027",
+      "importe": 1189,
+      "moneda": "MXN"
+    },
+    {
+      "referencia": "LIQ-00028",
+      "importe": 1196,
+      "moneda": "MXN"
+    }
+  ]
+}
