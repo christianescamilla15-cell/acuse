@@ -1,0 +1,33 @@
+{
+  "lote": "corte-C-00001",
+  "moneda": "MXN",
+  "conteo": 4,
+  "suma": "4742.00",
+  "hash_lote": "9abfe1d1f397137557a22757fbc89cc3a109522ebd732bf99ae4d447ba4dd2ba",
+  "filas": [
+    {
+      "referencia": "LIQ-00025",
+      "importe": "1175.00",
+      "moneda": "MXN",
+      "hash": "ff7faae462187a68353efff4526e1b852400944420f29d1097c315bf9e1fb8c5"
+    },
+    {
+      "referencia": "LIQ-00026",
+      "importe": "1182.00",
+      "moneda": "MXN",
+      "hash": "d2c5280a42552442346ca8b27836725a71f44728a1f962319bf1258edd2d245c"
+    },
+    {
+      "referencia": "LIQ-00027",
+      "importe": "1189.00",
+      "moneda": "MXN",
+      "hash": "340d40d598a6b6f00c7ff40e1b936769351908164437ec1d2cbd59c05340cb65"
+    },
+    {
+      "referencia": "LIQ-00028",
+      "importe": "1196.00",
+      "moneda": "MXN",
+      "hash": "dc2e0c000e4b1a8da5e1952476346ab04b3ee7c11a67f808666a639b1eed9909"
+    }
+  ]
+}

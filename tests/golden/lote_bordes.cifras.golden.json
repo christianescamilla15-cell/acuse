@@ -1,0 +1,195 @@
+{
+  "lote": "corte-golden-2026-11",
+  "moneda": "MXN",
+  "conteo": 31,
+  "suma": "1000013825.72",
+  "hash_lote": "fa707f406d69488b73e7827fedc807242faad9b499eff7f279e5d2acac389c98",
+  "filas": [
+    {
+      "referencia": "LIQ-G-0001",
+      "importe": "0.01",
+      "moneda": "MXN",
+      "hash": "ed3e6e04c1cf5f3cf33ffd35fd69c83a94a3e934ef789e3406d450309eaf4016"
+    },
+    {
+      "referencia": "LIQ-G-0002",
+      "importe": "0.00",
+      "moneda": "MXN",
+      "hash": "b45065c7dddadd9f99da41c78871ae0406c39cf14c37b45ca265265e7b9f4594"
+    },
+    {
+      "referencia": "LIQ-G-0003",
+      "importe": "-0.01",
+      "moneda": "MXN",
+      "hash": "5a969d2b4fa4c390fc52045ee0b39a0129123219c378636497a000d7b8738870"
+    },
+    {
+      "referencia": "LIQ-G-0004",
+      "importe": "0.00",
+      "moneda": "MXN",
+      "hash": "9d88451d88383d351e1af0f8694fbc923ae1f84d51ed122179edf88396d0ac2e"
+    },
+    {
+      "referencia": "LIQ-G-0005",
+      "importe": "2.68",
+      "moneda": "MXN",
+      "hash": "41fc791afda026c8d01b4d57fd49017b628dc029c243111405e5a95e601982d3"
+    },
+    {
+      "referencia": "LIQ-G-0006",
+      "importe": "1.01",
+      "moneda": "MXN",
+      "hash": "c173083980f5b71a24c54b52de4107203b19bc98813672ef9020d10257c3729a"
+    },
+    {
+      "referencia": "LIQ-G-0007",
+      "importe": "1.02",
+      "moneda": "MXN",
+      "hash": "49941e45993c4ac4f724f586370e632b1f6a719e7470b8d53274e2eaf2bf5108"
+    },
+    {
+      "referencia": "LIQ-G-0008",
+      "importe": "0.13",
+      "moneda": "MXN",
+      "hash": "772ea31faadf4676f7437eb6785d3d25197a03c22b7eeb48c3d0bd14ade7144b"
+    },
+    {
+      "referencia": "LIQ-G-0009",
+      "importe": "0.14",
+      "moneda": "MXN",
+      "hash": "2a92f3f7219dc3448e880913c341a5a09b21360093b9b17638cc8fd2d1a483b6"
+    },
+    {
+      "referencia": "LIQ-G-0010",
+      "importe": "1000.00",
+      "moneda": "MXN",
+      "hash": "d4794b6aa93fa031d6d10d795627df7add381a8a660d6e4998875928f2ed7d3d"
+    },
+    {
+      "referencia": "LIQ-G-0011",
+      "importe": "7.10",
+      "moneda": "MXN",
+      "hash": "2a5047aeba527107c66aaf2dedcaf86b7d62bbaef22c9f728fa3b9cb727198ed"
+    },
+    {
+      "referencia": "LIQ-G-0012",
+      "importe": "0.10",
+      "moneda": "MXN",
+      "hash": "7d0ee9b5b9434b5d26a193f314ff92ccd5dcc48f75c9230d4a0c6d37670a12ac"
+    },
+    {
+      "referencia": "LIQ-G-0013",
+      "importe": "1000000000.00",
+      "moneda": "MXN",
+      "hash": "d059bb102c5261d1e7a2418dfeaaa6d2a110b3fa34e0a6976ce6324f094de5a1"
+    },
+    {
+      "referencia": "LIQ-G-0014",
+      "importe": "0.01",
+      "moneda": "MXN",
+      "hash": "ebdae5608a65d9bcf3b3967c8b0444281d657b2310c7e20f246926794a47a7c8"
+    },
+    {
+      "referencia": "LIQ-G-0015",
+      "importe": "15.50",
+      "moneda": "MXN",
+      "hash": "facd9ce1643deb66194293affc2fc709b89a14a9d5c262373087410e2945c16f"
+    },
+    {
+      "referencia": "LIQ-G-0016",
+      "importe": "-15.51",
+      "moneda": "MXN",
+      "hash": "5f7458145c8d3f9c8ce87269b6073b9a5ba858f4f573564b23cb57d2c306c409"
+    },
+    {
+      "referencia": "LIQ-G-0017",
+      "importe": "3.14",
+      "moneda": "MXN",
+      "hash": "3eca95ec22d021b22300286cfd8da0a7a3a6fd12cd6d8288194dd1e1c43d36e3"
+    },
+    {
+      "referencia": "LIQ-G-0018",
+      "importe": "2.72",
+      "moneda": "MXN",
+      "hash": "edbc905477eb846cdced6314d0a586c6845710c56eadd989c077c50d541a57c3"
+    },
+    {
+      "referencia": "LIQ-G-0019",
+      "importe": "0.00",
+      "moneda": "MXN",
+      "hash": "8f71993c74ec7263e1ae56f3afa6173b1edfe912ad801177aef1ad6841d47db9"
+    },
+    {
+      "referencia": "LIQ-G-0020",
+      "importe": "0.01",
+      "moneda": "MXN",
+      "hash": "56495ba1cafc3f2e34617643f486e9a00dfe68629dd395800c3dceed3cc5fe33"
+    },
+    {
+      "referencia": "LIQ-G-0021",
+      "importe": "12345.68",
+      "moneda": "MXN",
+      "hash": "31ecce01b7c8a27f687db360c78e887a64c8ceac744d1f2c5bb20eb9df3b57a5"
+    },
+    {
+      "referencia": "LIQ-G-0022",
+      "importe": "88.89",
+      "moneda": "MXN",
+      "hash": "3d52f9f65267d7c20b4fe7a85db065a1b84588055fc1f1f3c876da77783461dd"
+    },
+    {
+      "referencia": "LIQ-G-0023",
+      "importe": "0.99",
+      "moneda": "MXN",
+      "hash": "49581f512199e6b3e930bb29695408f36554d2cba8cece696e7f65d832cea506"
+    },
+    {
+      "referencia": "LIQ-G-0024",
+      "importe": "1.00",
+      "moneda": "MXN",
+      "hash": "4795964033e64fd843089d7483e0e8bc62961824c26730d904683d4b08d0e670"
+    },
+    {
+      "referencia": "LIQ-G-0025",
+      "importe": "20.00",
+      "moneda": "MXN",
+      "hash": "78854eb8830f7161542405b1a13f944e0509c14f4f5970a31f877cc0e50fc384"
+    },
+    {
+      "referencia": "LIQ-G-0026",
+      "importe": "0.00",
+      "moneda": "MXN",
+      "hash": "57adf8f20e1bdeefabbfbe562bae74ccfcde8b748e5bf5d35ed386624c6d5bac"
+    },
+    {
+      "referencia": "LIQ-G-0027",
+      "importe": "250.00",
+      "moneda": "MXN",
+      "hash": "e2a30f0006b251e1774ee2ff6cda31a7bf4a5648817d3b5e3d65845773dd0cea"
+    },
+    {
+      "referencia": "LIQ-G-0028",
+      "importe": "1.10",
+      "moneda": "MXN",
+      "hash": "9bad91144a8bce1e52c5c8862d587d53ab4e43b4198408bb59f83025db4a09ab"
+    },
+    {
+      "referencia": "LIQ-G-0029",
+      "importe": "33.33",
+      "moneda": "MXN",
+      "hash": "750d3e309f1d1b514559370acae8c382f02a6f53d6cbf37228e306a7572b9d26"
+    },
+    {
+      "referencia": "LIQ-G-0030",
+      "importe": "66.67",
+      "moneda": "MXN",
+      "hash": "33187b0144945cc0a9c1e6aa7c9a9cec6551e5fc73276ab5119eaa2e438351fd"
+    },
+    {
+      "referencia": "LIQ-Ñ-0031",
+      "importe": "0.01",
+      "moneda": "MXN",
+      "hash": "23b7b6bb25e83b5a0738b3d8a45f2dfe2c96f706e81445cbde84829fba50b9b8"
+    }
+  ]
+}

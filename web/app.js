@@ -63,9 +63,18 @@ const app = {
 
 const $ = (sel) => document.querySelector(sel);
 
-/** Escapa texto antes de meterlo al DOM como HTML. */
+/**
+ * Escapa texto antes de meterlo al DOM como HTML.
+ *
+ * Semgrep (detect-replaceall-sanitization) pide una biblioteca de saneamiento. Aquí no
+ * hace falta: se escapan los CINCO caracteres significativos de HTML y el tablero sólo
+ * inserta valores en nodos de texto o en atributos ENTRE COMILLAS (title, class de una
+ * lista fija); nunca en URLs, manejadores de eventos, estilos ni <script>. Si eso cambia,
+ * esta supresión deja de valer.
+ */
 function esc(valor) {
   if (valor === null || valor === undefined) return '';
+  // nosemgrep: javascript.audit.detect-replaceall-sanitization.detect-replaceall-sanitization
   return String(valor)
     .replaceAll('&', '&amp;')
     .replaceAll('<', '&lt;')

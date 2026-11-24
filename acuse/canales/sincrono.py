@@ -27,7 +27,7 @@ from acuse.modelo import Entrega, ModoCanal, ahora
 
 def _sorteo(referencia: str, sal: str = "") -> float:
     """Número estable en [0, 1) derivado de la referencia. Sin azar, reproducible."""
-    digest = hashlib.blake2b(f"{sal}|{referencia}".encode("utf-8"), digest_size=8).digest()
+    digest = hashlib.blake2b(f"{sal}|{referencia}".encode(), digest_size=8).digest()
     return int.from_bytes(digest, "big") / 2**64
 
 

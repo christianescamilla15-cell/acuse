@@ -1,0 +1,8 @@
+# Cobertura: se reporta en el CI, no es la compuerta (la compuerta es docs/reglas.md).
+[run]
+source = acuse
+branch = true
+
+[report]
+show_missing = true
+skip_covered = true

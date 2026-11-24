@@ -1,0 +1,7 @@
+# Acuse — herramientas de desarrollo y pruebas (CI y local). No van a la imagen.
+-r requirements.txt
+pytest==9.2.0
+pytest-cov==7.1.0
+httpx==0.28.1          # TestClient de FastAPI y la prueba E2E contra el proceso
+schemathesis==4.34.2   # contrato contra la app en proceso, generado desde el OpenAPI
+ruff==0.17.6

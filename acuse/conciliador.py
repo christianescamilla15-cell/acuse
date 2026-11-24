@@ -13,19 +13,26 @@ Tres decisiones que hacen que la medición no se pueda maquillar:
     acuse y estar gravemente roto si la más vieja lleva semanas.
   * `resumen()` publica los DOS números —según el emisor y confirmado— uno junto al
     otro. Publicar sólo el primero es la forma más común de este fallo.
+
+Y una cuarta, para los lotes: el acuse dice QUE el lote llegó; `conciliar_lote()` dice
+si llegó COMPLETO, recalculando del lado receptor las cifras control que declaró el
+emisor (conteo, suma en Decimal y hash por fila; ver `acuse.cifras`).
 """
 from __future__ import annotations
 
 from collections import defaultdict
+from collections.abc import Iterable, Mapping
 from datetime import datetime
 
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from acuse.modelo import Brecha, EstadoEntrega, ahora
+from acuse.cifras import CifrasControl, ResultadoConciliacion, cifras_de_lote, conciliar_cifras
+from acuse.estados import Evento, siguiente
+from acuse.modelo import Brecha, EstadoEntrega, Trabajo, a_utc, ahora
 from acuse.persistencia import EntregaORM, EventoORM
 
-__all__ = ["brechas", "marcar_vencidas", "resumen"]
+__all__ = ["brechas", "cifras_declaradas", "conciliar_lote", "marcar_vencidas", "resumen"]
 
 # Lo que salió por un canal y todavía nadie confirmó.
 _SIN_CONFIRMAR = (EstadoEntrega.ENVIADO, EstadoEntrega.SIN_ACUSE)
@@ -47,8 +54,11 @@ def brechas(session: Session, momento: datetime | None = None) -> list[Brecha]:
 
     Las entregas RECHAZADO no aparecen aquí porque no tienen canal — nunca llegaron a
     salir. Se ven en `resumen()`, que no deja fuera ningún estado.
+
+    `momento` puede venir en cualquier zona horaria; la antigüedad se mide en tiempo
+    absoluto (UTC), así que un cambio de horario no la alarga ni la acorta.
     """
-    momento = momento or ahora()
+    momento = a_utc(momento or ahora())
 
     filas = session.scalars(
         select(EntregaORM).where(
@@ -76,7 +86,7 @@ def brechas(session: Session, momento: datetime | None = None) -> list[Brecha]:
             acumulado["sin_acuse"] += 1
 
         if fila.enviado_en is not None:
-            antiguedad = int((momento - fila.enviado_en).total_seconds())
+            antiguedad = int((momento - a_utc(fila.enviado_en)).total_seconds())
             if antiguedad > acumulado["mas_antiguo_s"]:
                 acumulado["mas_antiguo_s"] = antiguedad
 
@@ -103,7 +113,7 @@ def marcar_vencidas(session: Session, momento: datetime | None = None) -> int:
     cambie solo, sin que nadie levante la mano, es justo lo que evita que el problema
     se descubra semanas después.
     """
-    momento = momento or ahora()
+    momento = a_utc(momento or ahora())
 
     candidatas = session.scalars(
         select(EntregaORM).where(
@@ -117,9 +127,9 @@ def marcar_vencidas(session: Session, momento: datetime | None = None) -> int:
         if not fila.vencida(momento):
             continue
 
-        transcurridos = int((momento - fila.enviado_en).total_seconds())
+        transcurridos = int((momento - a_utc(fila.enviado_en)).total_seconds())
         exceso = transcurridos - fila.plazo_acuse_s
-        fila.estado = EstadoEntrega.SIN_ACUSE
+        fila.estado = siguiente(fila.estado, Evento.VENCIMIENTO)
         fila.detalle = (
             f"Sin acuse: se envió por «{fila.canal}» hace {transcurridos}s y el plazo "
             f"convenido es de {fila.plazo_acuse_s}s, excedido por {exceso}s. El envío "
@@ -191,3 +201,20 @@ def resumen(session: Session) -> dict:
             else f"Sin brecha: las {confirmado} que figuran como entregadas tienen acuse."
         ),
     }
+
+
+def cifras_declaradas(lote: str, trabajos: Iterable[Trabajo]) -> CifrasControl:
+    """Cifras control que el EMISOR declara para un lote: sólo los trabajos de ese lote."""
+    return cifras_de_lote(lote, ((t.referencia, t.carga) for t in trabajos if t.lote == lote))
+
+
+def conciliar_lote(
+    declaradas: CifrasControl, registros_recibidos: Iterable[tuple[str, Mapping]]
+) -> ResultadoConciliacion:
+    """Recalcula las cifras con lo que el receptor tiene y las compara con las declaradas.
+
+    `registros_recibidos` son pares (referencia, carga) tal como los lee el receptor (por
+    ejemplo `CanalLote.registros_del_lote`). Cada diferencia sale clasificada: FALTANTE,
+    SOBRANTE, IMPORTE_DISTINTO o MONEDA_DISTINTA; un lote sin filas es SIN_REGISTROS.
+    """
+    return conciliar_cifras(declaradas, cifras_de_lote(declaradas.lote, registros_recibidos))

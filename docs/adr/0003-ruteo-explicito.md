@@ -1,9 +1,10 @@
-# ADR-002 · Ruteo explícito: no existe canal por omisión
+# ADR 0003 · Ruteo explícito: no existe canal por omisión
 
 - **Estado:** aceptada
 - **Fecha:** 2026-08-21
 - **Ámbito:** enrutamiento (`acuse.ruteo`), `ReglaRuteo`, estado `RECHAZADO`
-- **Relacionada:** ADR-001 (acuse verificable del receptor)
+- **Relacionada:** ADR 0002 (acuse verificable del receptor)
+- **Antes:** `docs/decisiones/ADR-002-…` (renumerada el 2026-11-24 al ordenar `docs/adr/`)
 
 ---
 
@@ -30,10 +31,10 @@ Tiempo hasta detectarlo             5 semanas (por reclamo del receptor legítim
 
 Las 312 no fallaron. **Se procesaron correctamente en el lugar equivocado**: el canal las
 aceptó, el receptor de ese canal las acusó, y el destinatario legítimo nunca supo que
-existían. Con el ADR-001 puesto, esas 312 aparecen como `ACUSADO`: el acuse era genuino, y
+existían. Con el ADR 0002 puesto, esas 312 aparecen como `ACUSADO`: el acuse era genuino, y
 venía del receptor equivocado.
 
-Ahí está el punto fino: **el acuse verifica la recepción, no la pertinencia.** El ADR-001
+Ahí está el punto fino: **el acuse verifica la recepción, no la pertinencia.** El ADR 0002
 no cubre esta patología. Necesita la suya.
 
 Tres lecturas del fallo:
@@ -143,7 +144,7 @@ En concreto:
 - Cada entrega explica su propio canal. Las disputas sobre "por qué se fue por ahí" se
   resuelven mirando el registro, no reconstruyendo el estado de la máquina.
 - Los conflictos entre reglas se detectan al arrancar, no en producción y a medias.
-- Cierra el hueco que el ADR-001 no cubre: el acuse prueba **que llegó**; las reglas
+- Cierra el hueco que el ADR 0002 no cubre: el acuse prueba **que llegó**; las reglas
   prueban **que llegó a quien debía**.
 
 ### Negativas
@@ -160,7 +161,7 @@ En concreto:
   resultado es un rechazo. Es incómodo, y es preferible a un emparejamiento laxo que casa
   de más: la normalización pertenece al productor, no al enrutador.
 - **Fricción con productores externos.** Un emisor acostumbrado a que "siempre pasa algo"
-  verá rechazos que antes no veía. Es la misma conversación del ADR-001 y es igual de
+  verá rechazos que antes no veía. Es la misma conversación del ADR 0002 y es igual de
   incómoda.
 
 ### Neutras

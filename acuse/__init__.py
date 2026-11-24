@@ -3,4 +3,4 @@
 Tesis: *una entrega sin acuse verificable no es una entrega.*
 """
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"

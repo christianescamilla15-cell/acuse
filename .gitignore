@@ -7,9 +7,13 @@ __pycache__/
 
 # ── Entornos virtuales ────────────────────────────────────────────────────
 .venv/
+.venv-calidad/
 venv/
 env/
 ENV/
+
+# ── Dependencias de JavaScript (el tablero no usa npm; por si alguien lo agrega)
+node_modules/
 
 # ── Empaquetado / distribución ────────────────────────────────────────────
 build/
@@ -27,6 +31,13 @@ pip-wheel-metadata/
 .coverage.*
 htmlcov/
 coverage.xml
+reporte.xml
+# Reportes de los escaneos del CI (se suben como artefactos, no se versionan)
+*.sarif
+semgrep.json
+trivy.json
+gitleaks.log
+sbom.spdx.json
 .tox/
 .nox/
 .mypy_cache/
