@@ -94,13 +94,16 @@ jobs:
         run: |
           docker run -d --name acuse-archivo -p 8001:8000 -e ACUSE_BD=sqlite+pysqlite:////tmp/acuse.db acuse:ci
           herramientas/humo.sh http://localhost:8001
-          curl -fsS -X POST -H 'Content-Type: application/json' -d '{"n": 3}' http://localhost:8001/api/simular/corrida
-          antes="$(curl -fsS http://localhost:8001/api/resumen | python3 -c 'import json,sys; print(json.load(sys.stdin)["total"])')"
+          curl -fsS -o /dev/null -X POST -H 'Content-Type: application/json' -d '{"n": 3}' http://localhost:8001/api/simular/corrida
+          curl -fsS -o antes.json http://localhost:8001/api/resumen
           docker restart acuse-archivo
           herramientas/humo.sh http://localhost:8001
-          despues="$(curl -fsS http://localhost:8001/api/resumen | python3 -c 'import json,sys; print(json.load(sys.stdin)["total"])')"
-          echo "entregas antes=${antes} después=${despues}"
-          test "$antes" = "$despues"
+          curl -fsS -o despues.json http://localhost:8001/api/resumen
+          # Se compara desde archivos: nada de la red se entuba a un intérprete (Semgrep gha-curl-pipe-shell).
+          python3 -c 'import json, sys
+          antes, despues = (json.load(open(f))["total"] for f in ("antes.json", "despues.json"))
+          print(f"entregas antes={antes} después={despues}")
+          sys.exit(antes != despues or antes != 33)'
       - name: bitácoras si algo falló
         if: failure()
         run: |
